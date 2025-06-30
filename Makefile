@@ -12,19 +12,19 @@ DEBUG ?= 0
 all: encryptions client relay server
 
 encryptions:
-	$(MAKE) -C $(ENCRYPTIONS_DIR) BUILD_DIR=$(BUILD_DIR)/encryptions DEBUG=$(DEBUG)
+	$(MAKE) -C $(ENCRYPTIONS_DIR) BUILD_DIR=$(BUILD_DIR)/encryptions LIB_DIR=$(BUILD_DIR)/lib DEBUG=$(DEBUG)
 
 client:
-	$(MAKE) -C $(CLIENT_DIR) BUILD_DIR=$(BUILD_DIR)/client DEBUG=$(DEBUG)
+	$(MAKE) -C $(CLIENT_DIR) BUILD_DIR=$(BUILD_DIR)/client LIB_DIR=$(BUILD_DIR)/lib DEBUG=$(DEBUG)
 
 relay:
-	$(MAKE) -C $(RELAY_DIR)  BUILD_DIR=$(BUILD_DIR)/relay  DEBUG=$(DEBUG)
+	$(MAKE) -C $(RELAY_DIR)  BUILD_DIR=$(BUILD_DIR)/relay LIB_DIR=$(BUILD_DIR)/lib DEBUG=$(DEBUG)
 
 server:
-	$(MAKE) -C $(SERVER_DIR) BUILD_DIR=$(BUILD_DIR)/server DEBUG=$(DEBUG)
+	$(MAKE) -C $(SERVER_DIR) BUILD_DIR=$(BUILD_DIR)/server LIB_DIR=$(BUILD_DIR)/lib DEBUG=$(DEBUG)
 
 clean:
-	$(MAKE) -C $(ENCRYPTIONS_DIR) clean BUILD_DIR=$(BUILD_DIR)/encryptions
-	$(MAKE) -C $(CLIENT_DIR) clean BUILD_DIR=$(BUILD_DIR)/client
-	$(MAKE) -C $(RELAY_DIR)  clean BUILD_DIR=$(BUILD_DIR)/relay
-	$(MAKE) -C $(SERVER_DIR) clean BUILD_DIR=$(BUILD_DIR)/server
+	$(MAKE) -C $(ENCRYPTIONS_DIR) clean BUILD_DIR=$(BUILD_DIR)/encryptions LIB_DIR=$(BUILD_DIR)/lib
+	$(MAKE) -C $(CLIENT_DIR) clean BUILD_DIR=$(BUILD_DIR)/client LIB_DIR=$(BUILD_DIR)/lib
+	$(MAKE) -C $(RELAY_DIR)  clean BUILD_DIR=$(BUILD_DIR)/relay LIB_DIR=$(BUILD_DIR)/lib
+	$(MAKE) -C $(SERVER_DIR) clean BUILD_DIR=$(BUILD_DIR)/server LIB_DIR=$(BUILD_DIR)/lib

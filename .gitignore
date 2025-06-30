@@ -1,6 +1,9 @@
 # vscode
 .vscode/
 
+# gdb
+**/.gdb_history
+
 # Prerequisites
 *.d
 

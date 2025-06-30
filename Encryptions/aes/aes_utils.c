@@ -21,7 +21,7 @@ uint8_t sbox[BYTE_VALUES] = {
     0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35, 0x57, 0xB9, 0x86, 0xC1, 0x1D, 0x9E, // D
     0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF, // E
     0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16, // F
-}
+};
 
 uint8_t inv_sbox[BYTE_VALUES] = {
 //     0     1     2     3     4     5     6     7     8     9     A     B     C     D     E     F
@@ -43,19 +43,16 @@ uint8_t inv_sbox[BYTE_VALUES] = {
     0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D, // F
 };
 
-void cpy_block128(restrict aes_block128_t* value, const restrict aes_block128_t* operand) 
+inline void cpy_block128(aes_block128_t* restrict value, const aes_block128_t* restrict operand) 
 {
-    for (int i = 0; i < AES_BLOCK128_SIZE; ++i) 
-    {
-        value->bytes[i] = operand->bytes[i];
-    }
+    memcpy(value, operand, sizeof(aes_block128_t));
 }
 
-void xor_block128(restrict aes_block128_t* value, const restrict aes_block128_t* operand)
+inline void xor_block128(aes_block128_t* restrict value, const aes_block128_t* restrict operand)
 {
     for (uint16_t i = 0; i < AES_BLOCK128_SIZE; i++)
     {
-        value->bytes[i] ^= operand->bytes[i];
+        value->bytes[0][i] ^= operand->bytes[0][i];
     }
 }
 
@@ -63,7 +60,7 @@ void sub_bytes_block128(aes_block128_t* value)
 {
     for (uint16_t i = 0; i < AES_BLOCK128_SIZE; i++)
     {
-        value->bytes[i] = sbox[value->bytes[i]];
+        value->bytes[0][i] = sbox[value->bytes[0][i]];
     }
 }
 
@@ -71,32 +68,61 @@ void inv_sub_bytes_block128(aes_block128_t* value)
 {
     for (uint16_t i = 0; i < AES_BLOCK128_SIZE; i++)
     {
-        value->bytes[i] = inv_sbox[value->bytes[i]];
+        value->bytes[0][i] = inv_sbox[value->bytes[0][i]];
     }
 }
 
-static inline uint32_t rol32(uint32_t x, int n) 
+void shift_rows_block128(aes_block128_t* value)
 {
-    return (x << n) | (x >> (32 - n));
-}
+    uint8_t tmp;
 
-void shift_rows(aes_block128_t* value)
-{
-    value->rows[1] = rol32(value->rows[1], 8);
-    value->rows[2] = rol32(value->rows[2], 16);
-    value->rows[3] = rol32(value->rows[3], 24);
-}
+    // Row 1: shift left by 1
+    tmp = value->bytes[0][1];
+    value->bytes[0][1] = value->bytes[1][1];
+    value->bytes[1][1] = value->bytes[2][1];
+    value->bytes[2][1] = value->bytes[3][1];
+    value->bytes[3][1] = tmp;
 
-static inline uint32_t ror32(uint32_t x, int n) 
-{
-    return (x >> n) | (x << (32 - n));
-}
+    // Row 2: shift left by 2
+    tmp = value->bytes[0][2];
+    value->bytes[0][2] = value->bytes[2][2];
+    value->bytes[2][2] = tmp;
+    tmp = value->bytes[1][2];
+    value->bytes[1][2] = value->bytes[3][2];
+    value->bytes[3][2] = tmp;
 
-void inv_shift_rows(aes_block128_t* value)
+    // Row 3: shift left by 3 (aka right by 1)
+    tmp = value->bytes[3][3];
+    value->bytes[3][3] = value->bytes[2][3];
+    value->bytes[2][3] = value->bytes[1][3];
+    value->bytes[1][3] = value->bytes[0][3];
+    value->bytes[0][3] = tmp;
+}
+void inv_shift_rows_block128(aes_block128_t* value)
 {
-    value->rows[1] = ror32(value->rows[1], 8);
-    value->rows[2] = ror32(value->rows[2], 16);
-    value->rows[3] = ror32(value->rows[3], 24);
+    uint8_t tmp;
+
+    // Row 1: shift right by 1
+    tmp = value->bytes[3][1];
+    value->bytes[3][1] = value->bytes[2][1];
+    value->bytes[2][1] = value->bytes[1][1];
+    value->bytes[1][1] = value->bytes[0][1];
+    value->bytes[0][1] = tmp;
+
+    // Row 2: shift right by 2
+    tmp = value->bytes[0][2];
+    value->bytes[0][2] = value->bytes[2][2];
+    value->bytes[2][2] = tmp;
+    tmp = value->bytes[1][2];
+    value->bytes[1][2] = value->bytes[3][2];
+    value->bytes[3][2] = tmp;
+
+    // Row 3: shift right by 3 (which is a left shift by 1)
+    tmp = value->bytes[0][3];
+    value->bytes[0][3] = value->bytes[1][3];
+    value->bytes[1][3] = value->bytes[2][3];
+    value->bytes[2][3] = value->bytes[3][3];
+    value->bytes[3][3] = tmp;
 }
 
 
@@ -111,34 +137,23 @@ static inline uint8_t mul3(uint8_t x)
     return mul2(x) ^ x;
 }
 
-static void mix_column(uint8_t* r) 
+void mix_columns_block128(aes_block128_t* block) 
 {
-    uint8_t a0 = r[0], a1 = r[1], a2 = r[2], a3 = r[3];
-
-    //  02  03  01  01
-    //  01  02  03  01 
-    //  01  01  02  03
-    //  03  01  01  02
-    r[0] = mul2(a0) ^ mul3(a1) ^ a2 ^ a3;
-    r[1] = a0 ^ mul2(a1) ^ mul3(a2) ^ a3;
-    r[2] = a0 ^ a1 ^ mul2(a2) ^ mul3(a3);
-    r[3] = mul3(a0) ^ a1 ^ a2 ^ mul2(a3);
-}
-
-void mix_columns(aes_block128_t* block) 
-{
-    for (int col = 0; col < 4; ++col) 
+    for (int col = 0; col < AES_BLOCK128_SIDE; ++col) 
     {
-        uint8_t* c = &block->bytes[0][col];
+        uint8_t a0 = block->bytes[col][0];
+        uint8_t a1 = block->bytes[col][1];
+        uint8_t a2 = block->bytes[col][2];
+        uint8_t a3 = block->bytes[col][3];
 
-        uint8_t tmp[4] = { c[0], c[4], c[8], c[12] };
-
-        mix_column(tmp);
-
-        c[0]  = tmp[0];
-        c[4]  = tmp[1];
-        c[8]  = tmp[2];
-        c[12] = tmp[3];
+        //  02  03  01  01
+        //  01  02  03  01
+        //  01  01  02  03
+        //  03  01  01  02
+        block->bytes[col][0] = mul2(a0) ^ mul3(a1) ^ a2 ^ a3;
+        block->bytes[col][1] = a0 ^ mul2(a1) ^ mul3(a2) ^ a3;
+        block->bytes[col][2] = a0 ^ a1 ^ mul2(a2) ^ mul3(a3);
+        block->bytes[col][3] = mul3(a0) ^ a1 ^ a2 ^ mul2(a3);
     }
 }
 
@@ -153,7 +168,7 @@ static uint8_t mul(uint8_t x, uint8_t factor)
             res ^= x;
         }
 
-        x = xtime(x);
+        x = mul2(x);
 
         factor >>= 1;
     }
@@ -161,35 +176,20 @@ static uint8_t mul(uint8_t x, uint8_t factor)
     return res;
 }
 
-
-static void inv_mix_column(uint8_t* r) 
-{
-    uint8_t a0 = r[0], a1 = r[1], a2 = r[2], a3 = r[3];
-
-    //  0E  0B  0D  09
-    //  09  0E  0B  0D
-    //  0D  09  0E  0B
-    //  0B  0D  09  0E
-    r[0] = mul(a0, 0x0E) ^ mul(a1, 0x0B) ^ mul(a2, 0x0D) ^ mul(a3, 0x09);
-    r[1] = mul(a0, 0x09) ^ mul(a1, 0x0E) ^ mul(a2, 0x0B) ^ mul(a3, 0x0D);
-    r[2] = mul(a0, 0x0D) ^ mul(a1, 0x09) ^ mul(a2, 0x0E) ^ mul(a3, 0x0B);
-    r[3] = mul(a0, 0x0B) ^ mul(a1, 0x0D) ^ mul(a2, 0x09) ^ mul(a3, 0x0E);
-}
-
-
-void inv_mix_columns(aes_block128_t* block) 
+void inv_mix_columns_block128(aes_block128_t* block) 
 {
     for (int col = 0; col < 4; ++col) 
     {
-        uint8_t* c = &block->bytes[0][col];
+        uint8_t* c = &block->bytes[col][0];
+        uint8_t a0 = c[0], a1 = c[1], a2 = c[2], a3 = c[3];
 
-        uint8_t tmp[4] = { c[0], c[4], c[8], c[12] };
-
-        inv_mix_column(tmp);
-
-        c[0]  = tmp[0];
-        c[4]  = tmp[1];
-        c[8]  = tmp[2];
-        c[12] = tmp[3];
+        //  0E  0B  0D  09
+        //  09  0E  0B  0D
+        //  0D  09  0E  0B
+        //  0B  0D  09  0E
+        c[0] = mul(a0, 0x0E) ^ mul(a1, 0x0B) ^ mul(a2, 0x0D) ^ mul(a3, 0x09);
+        c[1] = mul(a0, 0x09) ^ mul(a1, 0x0E) ^ mul(a2, 0x0B) ^ mul(a3, 0x0D);
+        c[2] = mul(a0, 0x0D) ^ mul(a1, 0x09) ^ mul(a2, 0x0E) ^ mul(a3, 0x0B);
+        c[3] = mul(a0, 0x0B) ^ mul(a1, 0x0D) ^ mul(a2, 0x09) ^ mul(a3, 0x0E);
     }
 }

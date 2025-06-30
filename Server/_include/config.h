@@ -7,3 +7,5 @@ typedef struct config_metadata
     char* server;
     uint8_t relays;
 } config_metadata_t;
+
+bool fetch_config(const char* filepath, config_metadata_t* metadata);

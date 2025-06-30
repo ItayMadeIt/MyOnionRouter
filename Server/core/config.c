@@ -4,10 +4,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+#undef NULL
 #define NULL 0
 
 #define ARGS 2
 
+char* strdup(const char* str);
 
 char* file_to_string(FILE* fd)
 {
@@ -34,7 +36,7 @@ config_metadata_t str_to_metadata(const char* str)
     config_metadata_t result;
     memset(&result, NULL, sizeof(config_metadata_t));
 
-    char* mutable_str = strdup(str);
+    char* mutable_str = (char*)strdup(str);
     uint32_t length = strlen(mutable_str);
 
     char* mutable_end = mutable_str + length;
@@ -56,7 +58,7 @@ config_metadata_t str_to_metadata(const char* str)
         {
             iter += sizeof("server");
 
-            result.server = strdup(iter);
+            result.server = (char*)strdup(iter);
         }
         else if (memcmp(iter, "port", sizeof("port")-1) == 0)
         {

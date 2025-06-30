@@ -1,13 +1,12 @@
 CC = gcc
 AR = ar
 CFLAGS = -Wall -Wextra -std=c11 -I_include
-BUILD_DIR = build
-SRC_DIR = source
+SRC_DIRS = aes rsa sha
 
-SRC = $(wildcard $(SRC_DIR)/*.c)
-OBJ = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
+SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
+OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
-LIB = $(BUILD_DIR)/lib_encryptions.a
+LIB = $(LIB_DIR)/lib_encryptions.a
 
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
@@ -24,7 +23,7 @@ $(LIB): $(OBJ)
 	$(AR) rcs $@ $^
 
 # Compile source files to object files
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
