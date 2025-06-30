@@ -23,6 +23,9 @@ typedef struct __attribute__((aligned(16))) {
 typedef aes_block128_t aes_key[AES_BLOCK128_ROUNDS];
 
 // utils
+extern uint8_t sbox[BYTE_VALUES];
+extern uint8_t inv_sbox[BYTE_VALUES];
+
 void cpy_block128(restrict aes_block128_t* value, const restrict aes_block128_t* operand);
 void xor_block128(restrict aes_block128_t* value, const restrict aes_block128_t* operand);
 
