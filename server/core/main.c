@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     uint8_t hash[32];
     hash_sha256(arr, 64, hash);
         
-    // correct: ba7816bf 8f01cfea 414140de 5dae2223 b00361a3 96177a9c b410ff61 f20015ad
+    // correct: ba 78 16 bf 8f 01 cf ea 41 41 40 de 5d ae 22 23 b0 03 61 a3 96 17 7a 9c b4 10 ff 61 f2 00 15 ad
     for (int i = 0; i < 32; i++) printf("%02x ", hash[i]);
 
 

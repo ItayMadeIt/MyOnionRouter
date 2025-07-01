@@ -1,9 +1,9 @@
 BUILD_DIR := $(shell pwd)/build
 
-ENCRYPTIONS_DIR := Encryptions
-CLIENT_DIR := Client
-RELAY_DIR  := Relay
-SERVER_DIR := Server
+ENCRYPTIONS_DIR := encryptions
+CLIENT_DIR := client
+RELAY_DIR  := relay
+SERVER_DIR := server
 
 DEBUG ?= 0
 
