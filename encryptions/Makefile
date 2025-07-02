@@ -1,12 +1,19 @@
 CC = gcc
 AR = ar
-CFLAGS = -Wall -Wextra -std=c11 -I_include
-SRC_DIRS = aes rsa sha
+CFLAGS = -Wall -Wextra -std=c11 -I.
+SRC_DIRS = aes dh sha
 
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
+BUILD_DIR ?= build
+LIB_DIR ?= build/lib
+
 OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
-LIB = $(LIB_DIR)/lib_encryptions.a
+$(info BUILD_DIR=$(BUILD_DIR))
+$(info LIB_DIR=$(LIB_DIR))
+$(info OBJ=$(OBJ))
+
+LIB = $(LIB_DIR)/libencryptions.a
 
 DEBUG ?= 0
 ifeq ($(DEBUG),1)
@@ -17,16 +24,14 @@ endif
 
 all: $(LIB)
 
-# Build the static library
 $(LIB): $(OBJ)
 	@mkdir -p $(dir $@)
-	$(AR) rcs $@ $^
+	$(AR) rcs $@ $^ 
 
-# Compile source files to object files
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(LIB_DIR)
+	$(shell rm -rf $(BUILD_DIR))
+	$(shell rm -rf $(LIB_DIR))

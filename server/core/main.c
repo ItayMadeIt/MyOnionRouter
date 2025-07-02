@@ -1,23 +1,11 @@
 #include <stdio.h>
 #include <server.h>
-#include <aes.h>
-#include <sha256.h>
+#include <dh.h>
 
 #include <inttypes.h>
 
 
 #define ARGS 2
-
-void str_to_block128(aes_block128_t* block, const uint8_t input[16])
-{
-    for (int col = 0; col < 4; ++col)
-    {
-        for (int row = 0; row < 4; ++row)
-        {
-            block->bytes[col][row] = input[col * 4 + row];
-        }
-    }
-}
 
 int main(int argc, char *argv[])
 {
@@ -35,15 +23,35 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    uint8_t arr[64] = "abc";
-    hash_prepare_data_sha256(arr, 3, 64);
+     // initialize dh (generates n, g)
+    init_dh();
 
-    uint8_t hash[32];
-    hash_sha256(arr, 64, hash);
-        
-    // correct: ba 78 16 bf 8f 01 cf ea 41 41 40 de 5d ae 22 23 b0 03 61 a3 96 17 7a 9c b4 10 ff 61 f2 00 15 ad
-    for (int i = 0; i < 32; i++) printf("%02x ", hash[i]);
+    // Create two keys alice & bob
+    dh_key_t alice = create_dh_key();
+    dh_key_t bob = create_dh_key();
 
+    // export public keys
+    uint8_t alice_pub[DH_KEY_BYTES] = {0};
+    uint8_t bob_pub[DH_KEY_BYTES] = {0};
+
+    export_other_public(&alice, alice_pub);
+    export_other_public(&bob, bob_pub);
+
+    // Set the other's public key and compute common key
+    set_dh_key_other_public(&alice, bob_pub);
+    set_dh_key_other_public(&bob, alice_pub);
+
+    // Now alice.common_key and bob.common_key should be equal
+    if (mpz_cmp(alice.common_key, bob.common_key) == 0) {
+        printf("Shared secret matches!\n");
+    } else {
+        printf("Shared secret does NOT match!\n");
+    }
+
+    // Clean up
+    free_dh_key(&alice);
+    free_dh_key(&bob);
+    free_dh();
 
     return 0;
 }

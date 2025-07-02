@@ -1,12 +1,12 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -I_include
+CFLAGS = -Wall -Wextra -std=c11 -I_include 
 SRC_DIRS = core net
 
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 LIB_DIR ?= build/lib
-LIBS := $(wildcard $(LIB_DIR)/*.a)
+LIBS = -L$(LIB_DIR) -lencryptions -lgmp
 
 BIN = $(BUILD_DIR)/server
 

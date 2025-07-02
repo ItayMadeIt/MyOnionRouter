@@ -1,4 +1,4 @@
-#include <sha256.h>
+#include <sha/sha256.h>
 #include <assert.h>
 
 uint32_t round_constants[64] = {

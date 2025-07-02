@@ -7,7 +7,7 @@ SERVER_DIR := server
 
 DEBUG ?= 0
 
-.PHONY: all clean client relay server
+.PHONY: all clean encryptions client relay server
 
 all: encryptions client relay server
 
