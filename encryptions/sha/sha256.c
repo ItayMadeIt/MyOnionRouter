@@ -13,7 +13,7 @@ uint32_t round_constants[64] = {
 };
 
 
-bool hash_prepare_data_sha256(uint8_t* data, uint64_t length, uint64_t max_len)
+uint64_t hash_prepare_data_sha256(uint8_t* data, uint64_t length, uint64_t max_len)
 {
     // Calculate total padded length
     uint64_t total_len = length + 1 + sizeof(uint64_t);
@@ -22,7 +22,7 @@ bool hash_prepare_data_sha256(uint8_t* data, uint64_t length, uint64_t max_len)
     
     if (total_len > max_len)
     {
-        return false;
+        return 0;
     }
 
     // Append 0x80 byte
@@ -38,7 +38,7 @@ bool hash_prepare_data_sha256(uint8_t* data, uint64_t length, uint64_t max_len)
         data[total_len - sizeof(uint64_t) + i] = (bitlen >> (8 * (7 - i))) & 0xFF;
     }
 
-    return total_len <= max_len;
+    return total_len;
 }
 
 static inline uint32_t rotr(uint32_t x, uint32_t n) 

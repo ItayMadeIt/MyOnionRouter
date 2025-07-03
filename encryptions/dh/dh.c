@@ -5,13 +5,12 @@
 #include <stdbool.h>
 
 #define ENDIAN_MPZ -1
-#define PRIME_ROUNDS 25
 
-static mpz_t n;
+static mpz_t p;
 static mpz_t g;
 
 // Creates a random mpz value using urandom
-static void random_mpz_from_urandom(mpz_t result, size_t num_bytes) 
+static void random_mpz_from_urandom(mpz_t result, uint64_t num_bytes) 
 {
     FILE *f = fopen("/dev/urandom", "rb");
     
@@ -33,18 +32,39 @@ static void random_mpz_from_urandom(mpz_t result, size_t num_bytes)
     mpz_import(result, num_bytes, ENDIAN_MPZ, 1, 0, 0, buffer);
 }
 
+static void export_mpz_fixed(uint8_t* out, const mpz_t val, uint64_t size)
+{
+    uint64_t count = 0;
 
-// Generates a prime number with `bytes` bytes, p < (global)n
-static void generate_prime_low_n(mpz_t p, int bytes)
+    mpz_export(out, &count, ENDIAN_MPZ, 1, 0, 0, val);
+
+    if (count < size)
+    {
+        uint64_t diff = size - count;
+
+        // big endian
+        if (ENDIAN_MPZ == 1)
+        {
+            memmove(out + diff, out, count);
+            memset(out, 0, diff);
+        }
+        else if (ENDIAN_MPZ == -1)
+        {
+            memset(out + count, 0, diff);
+        }
+    }
+}
+// Generates a prime number with `bytes` bytes, res < (global)p
+static void generate_prime_low_p(mpz_t res, int bytes)
 {
     while (true) 
     {
-        random_mpz_from_urandom(p, bytes);
+        random_mpz_from_urandom(res, bytes);
 
-        mpz_nextprime(p, p);
+        mpz_nextprime(res, res);
 
-        // Found only if p < n
-        if (mpz_cmp(p, n) < 0) 
+        // Found only if res < p
+        if (mpz_cmp(res, p) < 0) 
         {
             break;
         }
@@ -52,35 +72,48 @@ static void generate_prime_low_n(mpz_t p, int bytes)
 }
 
 // Generates a prime with `bytes` bytes
-static void generate_prime(mpz_t p, int bytes)
+static void generate_prime(mpz_t res, int bytes)
 {
-    random_mpz_from_urandom(p, bytes - 1);
+    random_mpz_from_urandom(res, bytes - 1);
     
-    mpz_setbit(p, bytes * 8 - 1);
-    mpz_setbit(p, 0);
+    mpz_setbit(res, bytes * 8 - 1);
+    mpz_setbit(res, 0);
 
-    mpz_nextprime(p, p);
+    mpz_nextprime(res, res);
 }
 
 void init_dh()
 {
-    mpz_init(n);
-    generate_prime(n, DH_KEY_BYTES);
-
-    mpz_init_set_ui(g, 5);
-}
-
-void init_dh_known_n(uint8_t public_n[DH_KEY_BYTES])
-{
-    mpz_init(n);
-    mpz_import(n, DH_KEY_BYTES, ENDIAN_MPZ, 1, 0, 0, public_n);
-
+    mpz_init(p);
+    generate_prime(p, DH_KEY_BYTES);
     mpz_init_set_ui(g, G_GLOBAL);
 }
 
+void get_prime_dh(uint8_t res[DH_KEY_BYTES])
+{
+    export_mpz_fixed(res, p, DH_KEY_BYTES);
+}
+
+void get_generator_dh(uint64_t* res)
+{
+    *res = mpz_get_ui(g);
+}
+
+
+void set_prime_dh(const uint8_t value[DH_KEY_BYTES])
+{
+    mpz_import(p, DH_KEY_BYTES, ENDIAN_MPZ, 1, 0, 0, value);
+}
+
+void set_generator_dh(const uint64_t value)
+{
+    mpz_set_ui(g, value);
+}
+
+
 void free_dh()
 {
-    mpz_clear(n);
+    mpz_clear(p);
     mpz_clear(g);
 }
 
@@ -92,35 +125,49 @@ dh_key_t create_dh_key()
     mpz_init(key.other_public);
     mpz_init(key.common_key);
 
-    // max 2^(DH_KEY_BYTES*8) random prime value
-    generate_prime_low_n(key.this_private, DH_KEY_BYTES);
-
-    // this_public = g^x % n
-    mpz_powm(key.this_public, g, key.this_private, n);
-
     return key;
 }
 
-void export_other_public(dh_key_t* key, uint8_t other_public_data[DH_KEY_BYTES])
+void gen_dh_key_private_prime(dh_key_t* key)
 {
-    size_t count = 0;
+    // max 2^(DH_KEY_BYTES*8) random prime value
+    generate_prime_low_p(key->this_private, DH_KEY_BYTES);
 
-    mpz_export(other_public_data, &count, ENDIAN_MPZ, 1, 0, 0, key->other_public);
-
-    for (size_t i = count; i < DH_KEY_BYTES; i++) 
-    {
-        other_public_data[i] = 0;
-    }
+    // this_public = g^x % p
+    mpz_powm(key->this_public, g, key->this_private, p);
 }
 
+void set_dh_key_private_prime(dh_key_t* key, const uint8_t val[DH_KEY_BYTES])
+{
+    // max 2^(DH_KEY_BYTES*8) prime value in `val`, x=`val`
+    mpz_import(key->this_private, DH_KEY_BYTES, 1, 1, 1, 0, val);
 
-void set_dh_key_other_public(dh_key_t* key, uint8_t other_public_data[DH_KEY_BYTES])
+    // this_public = g^x % p
+    mpz_powm(key->this_public, g, key->this_private, p);
+}
+
+void get_dh_key_private_prime(const dh_key_t* key, uint8_t res[DH_KEY_BYTES])
+{
+    export_mpz_fixed(res, key->this_private, DH_KEY_BYTES);
+}
+
+void set_dh_key_other_public(dh_key_t* key, const uint8_t val[DH_KEY_BYTES])
 {
     // Import bytes into the mpz_t
-    mpz_import(key->other_public, DH_KEY_BYTES, ENDIAN_MPZ, 1, 0, 0, other_public_data);
+    mpz_import(key->other_public, DH_KEY_BYTES, ENDIAN_MPZ, 1, 0, 0, val);
 
-    // common_key = (g^y (other_public)) ^ (x(private)) % n => g^xy % n
-    mpz_powm(key->common_key, key->other_public, key->this_private, n);
+    // common_key = (g^y (other_public)) ^ (x(private)) % p => g^xy % p
+    mpz_powm(key->common_key, key->other_public, key->this_private, p);
+}
+
+void get_dh_key_other_public(const dh_key_t* key, uint8_t res[DH_KEY_BYTES])
+{
+    export_mpz_fixed(res, key->other_public, DH_KEY_BYTES);
+}
+
+void get_dh_common_key(const dh_key_t* key, uint8_t res[DH_KEY_BYTES])
+{
+    export_mpz_fixed(res, key->common_key, DH_KEY_BYTES);
 }
 
 void free_dh_key(dh_key_t* key)

@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <server.h>
-#include <dh.h>
+#include <encryptions/encryptions.h>
 
 #include <inttypes.h>
 
@@ -23,35 +23,44 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-     // initialize dh (generates n, g)
-    init_dh();
 
-    // Create two keys alice & bob
-    dh_key_t alice = create_dh_key();
-    dh_key_t bob = create_dh_key();
+    // Initialize encryption (sets up DH globals)
+    init_encryption();
 
-    // export public keys
-    uint8_t alice_pub[DH_KEY_BYTES] = {0};
-    uint8_t bob_pub[DH_KEY_BYTES] = {0};
+    // Generate Alice and Bob key data
+    key_data_t alice = init_key();
+    key_data_t bob = init_key();
 
-    export_other_public(&alice, alice_pub);
-    export_other_public(&bob, bob_pub);
+    // Generate private keys (and compute g^x)
+    gen_asymmetric_private_key(&alice);
+    gen_asymmetric_private_key(&bob);
 
-    // Set the other's public key and compute common key
-    set_dh_key_other_public(&alice, bob_pub);
-    set_dh_key_other_public(&bob, alice_pub);
+    // Export public keys
+    uint8_t alice_pub[ASYMMETRIC_KEY_BYTES] = {0};
+    uint8_t bob_pub[ASYMMETRIC_KEY_BYTES] = {0};
 
-    // Now alice.common_key and bob.common_key should be equal
-    if (mpz_cmp(alice.common_key, bob.common_key) == 0) {
+    get_dh_key_other_public(&alice.asymmetric_key, alice_pub);
+    get_dh_key_other_public(&bob.asymmetric_key, bob_pub);
+
+    // Exchange public keys and derive symmetric key
+    derive_symmetric_key_from_public(&alice, bob_pub);
+    derive_symmetric_key_from_public(&bob, alice_pub);
+
+    // Compare symmetric keys
+    if (memcmp(&alice.symmetric_key, &bob.symmetric_key, AES_BYTES) == 0)
+    {
         printf("Shared secret matches!\n");
-    } else {
+    }
+    else
+    {
         printf("Shared secret does NOT match!\n");
     }
 
-    // Clean up
-    free_dh_key(&alice);
-    free_dh_key(&bob);
-    free_dh();
+    // Cleanup
+    free_key(&alice);
+    free_key(&bob);
+    free_encryption();
 
+    
     return 0;
 }

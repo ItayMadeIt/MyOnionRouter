@@ -1,11 +1,14 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -I_include
+CFLAGS = -Wall -Wextra -std=c11 -I_include -I$(INCLUDE_DIR) 
 SRC_DIRS = core net
+
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
+
 LIB_DIR ?= build/lib
-LIBS := $(wildcard $(LIB_DIR)/*.a)
+INCLUDE_DIR ?= ./_include
+LIBS = -L$(LIB_DIR) -lencryptions -lgmp
 
 BIN = $(BUILD_DIR)/relay
 
@@ -18,15 +21,17 @@ endif
 
 all: $(BIN)
 
-# Rule to compile binary
 $(BIN): $(OBJ)
+	@echo "Compiling binary $< to $@"
 	@mkdir -p $(dir $@)
 	$(CC) $(OBJ) -o $@ $(LIBS)
 
-# Rule to build object files
 $(BUILD_DIR)/%.o: %.c
+	@echo "Compiling $< to $@"
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR)
+	@echo "rm -rf $(BUILD_DIR)"
+	@rm -rf $(BUILD_DIR)
+

@@ -14,13 +14,21 @@ typedef struct dh_key
 
 } dh_key_t;
 
+void init_dh(void);
+void free_dh(void);
 
-void init_dh();
-void init_dh_known_n(uint8_t public_n[DH_KEY_BYTES]);
-void free_dh();
+void get_prime_dh(uint8_t res[DH_KEY_BYTES]);
+void set_prime_dh(const uint8_t value[DH_KEY_BYTES]);
+void get_generator_dh(uint64_t* res);
+void set_generator_dh(uint64_t value);
 
-dh_key_t create_dh_key();
-
-void set_dh_key_other_public(dh_key_t* key, uint8_t other_public_data[DH_KEY_BYTES]);
-
+dh_key_t create_dh_key(void);
 void free_dh_key(dh_key_t* key);
+
+void gen_dh_key_private_prime(dh_key_t* key);
+void set_dh_key_private_prime(dh_key_t* key, const uint8_t val[DH_KEY_BYTES]);
+void get_dh_key_private_prime(const dh_key_t* key, uint8_t res[DH_KEY_BYTES]);
+
+void set_dh_key_other_public(dh_key_t* key, const uint8_t val[DH_KEY_BYTES]);
+void get_dh_key_other_public(const dh_key_t* key, uint8_t res[DH_KEY_BYTES]);
+void get_dh_common_key(const dh_key_t* key, uint8_t res[DH_KEY_BYTES]);
