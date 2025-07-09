@@ -1,3 +1,6 @@
+#ifndef __ENCRYPTIONS_H__
+#define __ENCRYPTIONS_H__
+
 #include <aes/aes.h>
 #include <dh/dh.h>
 #include <sha/sha256.h>
@@ -39,3 +42,5 @@ void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_K
 // Uses symmetric key to encrypt data, result is in data as well...
 void symmetric_encrypt(key_data_t* key, uint8_t* data, uint64_t length);
 
+
+#endif // __ENCRYPTIONS_H__

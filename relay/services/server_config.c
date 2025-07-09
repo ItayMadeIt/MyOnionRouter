@@ -1,15 +1,15 @@
-#include <config.h>
+#include <configs.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+#include <utils/string_utils.h>
+
 #undef NULL
 #define NULL 0
 
 #define ARGS 2
-
-char* strdup(const char* str);
 
 char* file_to_string(FILE* fd)
 {
@@ -31,12 +31,16 @@ char* file_to_string(FILE* fd)
     return str;
 }
 
-config_metadata_t str_to_metadata(const char* str)
+server_config_metadata_t* str_to_metadata(const char* str)
 {
-    config_metadata_t result;
-    memset(&result, NULL, sizeof(config_metadata_t));
+    server_config_metadata_t* result = (server_config_metadata_t*)malloc(sizeof(server_config_metadata_t));
+    if (result == NULL)
+    {
+        return NULL;
+    }
+    memset(result, NULL, sizeof(server_config_metadata_t));
 
-    char* mutable_str = (char*)strdup(str);
+    char* mutable_str = clone_str(str);
     uint32_t length = strlen(mutable_str);
 
     char* mutable_end = mutable_str + length;
@@ -54,23 +58,18 @@ config_metadata_t str_to_metadata(const char* str)
     while(iter < mutable_end)
     {
         if (memcmp(iter, "server", sizeof("server")-1) == 0
-            && result.server == NULL)
+            && result->server == NULL)
         {
             iter += sizeof("server");
 
-            result.server = (char*)strdup(iter);
+            result->server = (char*)clone_str(iter);
         }
-        else if (memcmp(iter, "port", sizeof("port")-1) == 0)
+        else if (memcmp(iter, "port", sizeof("port")-1) == 0
+            && result->port == NULL)
         {
             iter += sizeof("port");
 
-            result.port = atoi(iter);
-        }
-        else if (memcmp(iter, "relays", sizeof("relays")-1) == 0)
-        {
-            iter += sizeof("relays");
-
-            result.relays = atoi(iter);
+            result->port = (char*)clone_str(iter);
         }
 
         iter += strlen(iter) + 1;
@@ -81,12 +80,16 @@ config_metadata_t str_to_metadata(const char* str)
     return result;
 }
 
-void free_config(config_metadata_t* metadata)
+void free_server_config(server_config_metadata_t* metadata)
 {
     free(metadata->server);
+    metadata->server = NULL;
+    
+    free(metadata->port);
+    metadata->port = NULL;
 }
 
-bool fetch_config(const char* filepath, config_metadata_t* metadata)
+bool fetch_server_config(const char* filepath, server_config_metadata_t** metadata)
 {
     FILE* config_fd = fopen(filepath, "r");
     if (config_fd == NULL)

@@ -1,15 +1,15 @@
 CC = gcc
 AR = ar
-CFLAGS = -Wall -Wextra -m64 -std=c11 -I.
+CFLAGS = -Wall -Wextra -std=c11 -m64 -I.
 
-SRC_DIRS = aes dh sha source
+SRC_DIRS = string_utils
 SRC := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
 BUILD_DIR ?= build
 LIB_DIR ?= build/lib
 
 OBJ := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
-LIB := $(LIB_DIR)/libencryptions.a
+LIB := $(LIB_DIR)/libutils.a
 
 .PHONY: all clean
 

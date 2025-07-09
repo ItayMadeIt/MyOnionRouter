@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -I_include -I$(INCLUDE_DIR) 
-SRC_DIRS = core net
+CFLAGS = -Wall -Wextra -std=c11 -m64 -I_include -I$(INCLUDE_DIR) 
+SRC_DIRS = core net net services
 
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
@@ -8,7 +8,7 @@ OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
 
 LIB_DIR ?= build/lib
 INCLUDE_DIR ?= ./_include
-LIBS = -L$(LIB_DIR) -lencryptions -lgmp
+LIBS = -L$(LIB_DIR) -lencryptions -lgmp -lutils
 
 BIN = $(BUILD_DIR)/relay
 

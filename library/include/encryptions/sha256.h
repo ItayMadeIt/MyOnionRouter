@@ -1,3 +1,6 @@
+#ifndef __SHA256_H__
+#define __SHA256_H__
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -10,3 +13,5 @@ uint64_t hash_prepare_data_sha256(uint8_t* data, uint64_t length, uint64_t max_l
 // The input 'data' MUST be pre-padded to a multiple of 64 bytes (512 bits).
 // This function will not perform padding or length encoding.
 void hash_sha256(uint8_t* data , uint64_t length, uint8_t* out_hash /*32 bytes*/);
+
+#endif // __SHA256_H__

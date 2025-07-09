@@ -1,11 +1,15 @@
+#ifndef __CONFIG_H__
+#define __CONFIG_H__
+
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef struct config_metadata
 {
-    uint16_t port;
+    char* port;
     char* server;
-    uint8_t relays;
 } config_metadata_t;
 
 bool fetch_config(const char* filepath, config_metadata_t* metadata);
+#endif // __CONFIG_H__

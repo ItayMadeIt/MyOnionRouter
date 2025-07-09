@@ -1,3 +1,6 @@
+#ifndef __DH_H__
+#define __DH_H__
+
 #include <gmp.h>
 #include <stdint.h>
 
@@ -32,3 +35,5 @@ void get_dh_key_private_prime(const dh_key_t* key, uint8_t res[DH_KEY_BYTES]);
 void set_dh_key_other_public(dh_key_t* key, const uint8_t val[DH_KEY_BYTES]);
 void get_dh_key_other_public(const dh_key_t* key, uint8_t res[DH_KEY_BYTES]);
 void get_dh_common_key(const dh_key_t* key, uint8_t res[DH_KEY_BYTES]);
+
+#endif // __DH_H__

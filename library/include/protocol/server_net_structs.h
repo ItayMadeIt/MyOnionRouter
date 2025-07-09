@@ -1,0 +1,106 @@
+#ifndef __SERVER_NET_STRUCTS_H__
+#define __SERVER_NET_STRUCTS_H__
+
+#include <stdint.h>
+#include <encryptions/encryptions.h>
+#include "relay_data_structs.h"
+
+#define SERVER_HANDSHAKE_VERSION 1
+#define SERVER_HANDSHAKE_V1_MAGIC "M0R1"
+#define SERVER_HANDSHAKE_V1_MAGIC_LEN (sizeof(SERVER_HANDSHAKE_V1_MAGIC) - 1)
+
+#define SERVER_RELAYS_MAP_AMOUNT 16
+
+// User types
+typedef enum server_user_types
+{
+    USER_TYPE_INVALID = 0,
+    USER_TYPE_CLIENT  = 1,
+    USER_TYPE_RELAY   = 2,
+} server_user_types_t;
+
+
+// Version one, protocol
+typedef struct server_handshake_request
+{
+    uint16_t version;       // Protocol version
+    uint8_t user_type;      // server_user_types_t (1 byte)
+    uint8_t flags;          // Bit flags (unsued)
+    
+} __attribute__((packed)) server_handshake_request_t;
+
+
+typedef struct server_handshake_response
+{
+    uint64_t g;                                  // Generator
+    uint8_t p[ASYMMETRIC_KEY_BYTES];             // Prime modulus
+    uint8_t server_pubkey[ASYMMETRIC_KEY_BYTES]; // g^x mod p
+
+} __attribute__((packed)) server_handshake_response_t;
+
+typedef struct server_handshake_client_key
+{
+    // g^y mod p (client’s or relay’s DH public key)
+    uint8_t client_pubkey[ASYMMETRIC_KEY_BYTES]; 
+
+} __attribute__((packed)) server_handshake_client_key_t;
+
+typedef struct server_handshake_confirmation
+{
+    // Magic (changes each version, for 1: "M0R1"-SERVER_HANDSHAKE_V1_MAGIC)
+    uint8_t magic[SERVER_HANDSHAKE_V1_MAGIC_LEN];
+    
+    // Only meaningful for relays (for clients may be used, for now = 0)
+    uint32_t assigned_id;
+
+    // Time it was sent
+    uint64_t timestamp; 
+
+} __attribute__((packed)) server_handshake_confirmation_t;
+
+const server_handshake_confirmation_t base_confirmation = {SERVER_HANDSHAKE_V1_MAGIC, 0, 0};
+
+typedef enum relay_command_t {
+    RELAY_COMMAND_LOGIN   = 1,
+    RELAY_COMMAND_SIGNOUT = 2
+} relay_command_t;
+
+typedef enum client_command_t {
+    CLIENT_COMMAND_GET_RELAY_MAP = 1
+} client_command_t;
+
+
+typedef struct server_relay_request
+{
+    uint16_t command; // Only 2 commands now, relay login, relay signout
+} __attribute__((packed)) server_relay_request_t;
+
+typedef struct server_relay_request_login
+{
+    uint16_t command; // relay login
+
+    relay_sock_addr_t relay_addr;
+
+} __attribute__((packed)) server_relay_request_login_t;
+
+typedef struct server_relay_request_signout
+{
+    uint16_t command; // relay login
+
+    uint32_t assigned_id; // relay id (from handshake confirmation)
+
+} __attribute__((packed)) server_relay_request_signout_t;
+
+typedef struct server_client_request
+{
+    uint16_t command; // Only 1 command now, client request relay map
+} __attribute__((packed)) server_client_request_t;
+
+typedef struct server_relay_list {
+    
+    relay_descriptor_t relays[SERVER_RELAYS_MAP_AMOUNT];
+
+} __attribute__((packed)) server_relay_list_t;
+
+
+#endif // __SERVER_NET_STRUCTS_H__

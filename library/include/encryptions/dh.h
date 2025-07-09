@@ -1,3 +1,6 @@
+#ifndef __DH_H__
+#define __DH_H__
+
 #include <gmp.h>
 #include <stdint.h>
 
@@ -27,3 +30,5 @@ dh_key_t create_dh_key();
 void set_dh_key_other_public(dh_key_t* key, const uint8_t other_public_data[DH_KEY_BYTES]);
 
 void free_dh_key(dh_key_t* key);
+
+#endif // __DH_H__

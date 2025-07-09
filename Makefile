@@ -2,6 +2,7 @@ PWD_DIR = $(shell pwd)
 BUILD_DIR := build
 
 ENCRYPTIONS_DIR := encryptions
+UTILS_DIR := utils
 CLIENT_DIR := client
 RELAY_DIR  := relay
 SERVER_DIR := server
@@ -11,13 +12,20 @@ INCLUDE_DIR := library/include
 
 DEBUG ?= 0
 
-.PHONY: all clean encryptions client relay server
+.PHONY: all clean encryptions utils client relay server
 
-all: encryptions client relay server
+all: encryptions utils client relay server
 
 encryptions:
 	$(MAKE) -C $(ENCRYPTIONS_DIR) \
 		BUILD_DIR=../$(BUILD_DIR)/encryptions \
+		LIB_DIR=../$(LIB_DIR) \
+		INCLUDE_DIR=../$(INCLUDE_DIR) \
+		DEBUG=$(DEBUG)
+
+utils:
+	$(MAKE) -C $(UTILS_DIR) \
+		BUILD_DIR=../$(BUILD_DIR)/utils \
 		LIB_DIR=../$(LIB_DIR) \
 		INCLUDE_DIR=../$(INCLUDE_DIR) \
 		DEBUG=$(DEBUG)
@@ -45,7 +53,13 @@ server:
 
 clean:
 	$(MAKE) -C $(ENCRYPTIONS_DIR) clean \
-		BUILD_DIR=../$(BUILD_DIR)/client \
+		BUILD_DIR=../$(BUILD_DIR)/encryptions \
+		LIB_DIR=../$(LIB_DIR) \
+		INCLUDE_DIR=../$(INCLUDE_DIR) \
+		DEBUG=$(DEBUG)
+
+	$(MAKE) -C $(UTILS_DIR) clean \
+		BUILD_DIR=../$(BUILD_DIR)/utils \
 		LIB_DIR=../$(LIB_DIR) \
 		INCLUDE_DIR=../$(INCLUDE_DIR) \
 		DEBUG=$(DEBUG)

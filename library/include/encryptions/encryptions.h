@@ -1,3 +1,6 @@
+#ifndef __ENCRYPTIONS_H__
+#define __ENCRYPTIONS_H__
+
 #include "aes.h"
 #include "dh.h"
 #include "sha256.h"
@@ -5,13 +8,13 @@
 #define ASYMMETRIC_KEY_BYTES 256 /*Same as diffie hellman 2^256*8 = 2^2048, size of key*/
 #define SHA_PADDING 64 
 #define SHA_BUF_SIZE 32 
-#define AES_BYTES 16 
+#define SYMMETRIC_KEY_BYTES 16 
 
 typedef struct key_data
 {
     dh_key_t asymmetric_key;
     aes_block128_t symmetric_key; 
-    
+
 } key_data_t;
 
 void init_encryption();
@@ -40,3 +43,5 @@ void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_K
 // Uses symmetric key to encrypt data, result is in data as well...
 void symmetric_encrypt(key_data_t* key, uint8_t* data, uint64_t length);
 
+
+#endif // __ENCRYPTIONS_H__

@@ -17,5 +17,5 @@ This project is a low-level, lightweight version of TOR, aiming to create a simp
 ## Libraries
 This project uses minimal external libraries. The libaries:
 - `libc` – Standard C library, included on all Linux systems.
-- [`mini-gmp`](https://gmplib.org/) - a minimalistic subset of GMP for big integer arithmetic.  
+- [`GMP`](https://gmplib.org/) – A well-known library for big integer arithmetic.  
   Licensed under the GNU GPL or LGPL. See `licenses/` for full terms.

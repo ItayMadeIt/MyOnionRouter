@@ -13,13 +13,10 @@
 #define AES_BLOCK128_KEYS (AES_BLOCK128_ROUNDS + 1) 
 
 typedef struct __attribute__((aligned(16))) {
-    
-    union
-    {
+    union {
         uint8_t bytes[AES_BLOCK128_SIDE][AES_BLOCK128_SIDE];
-        uint32_t columns[4];      // reinterpret each column
+        uint32_t columns[4];
     };
-
 } aes_block128_t;
 
 typedef aes_block128_t aes_keys_t[AES_BLOCK128_KEYS];
