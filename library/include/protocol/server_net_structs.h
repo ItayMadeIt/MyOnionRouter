@@ -1,8 +1,8 @@
 #ifndef __SERVER_NET_STRUCTS_H__
 #define __SERVER_NET_STRUCTS_H__
 
-#include <stdint.h>
 #include <encryptions/encryptions.h>
+#include <stdint.h>
 #include "relay_data_structs.h"
 
 #define SERVER_HANDSHAKE_VERSION 1
@@ -12,12 +12,12 @@
 #define SERVER_RELAYS_MAP_AMOUNT 16
 
 // User types
-typedef enum server_user_types
+typedef enum prot_server_user_types
 {
-    USER_TYPE_INVALID = 0,
-    USER_TYPE_CLIENT  = 1,
-    USER_TYPE_RELAY   = 2,
-} server_user_types_t;
+    prot_user_type_invalid = 0,
+    prot_user_type_client  = 1,
+    prot_user_type_relay   = 2,
+} prot_server_user_types_t;
 
 
 // Version one, protocol
@@ -25,7 +25,7 @@ typedef struct server_handshake_request
 {
     uint16_t version;       // Protocol version
     uint8_t user_type;      // server_user_types_t (1 byte)
-    uint8_t flags;          // Bit flags (unsued)
+    uint8_t flags;          // Bit flags (unused)
     
 } __attribute__((packed)) server_handshake_request_t;
 

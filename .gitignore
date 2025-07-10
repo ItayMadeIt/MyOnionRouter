@@ -1,6 +1,9 @@
 # vscode
 .vscode/
 
+# cache 
+.cache/
+
 # gdb
 **/.gdb_history
 

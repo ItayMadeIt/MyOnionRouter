@@ -1,4 +1,4 @@
-#include <sock_utils.h>
+#include "sock_utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-int create_and_bind(const config_metadata_t* config)
+int create_and_bind(const server_config_metadata_t* config)
 {
     struct addrinfo hints, *res;
 
@@ -31,35 +31,20 @@ int create_and_bind(const config_metadata_t* config)
     if (sock_fd == -1)
     {
         // socket() failed
+        freeaddrinfo(res);
         return -1;
     }
+
+    int optval = 1;
+    setsockopt(sock_fd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
     if (bind(sock_fd, res->ai_addr, res->ai_addrlen) == -1)
     {
         // bind() failed
+        freeaddrinfo(res);
         return -1;
     }
 
+    freeaddrinfo(res);
     return sock_fd;
-}
-
-void accept_loop(int server_fd, void (*accept_callback)(int client_fd))
-{
-    while (true)
-    {
-        int client_fd = accept(server_fd, NULL, NULL);
-
-        // Accept had error
-        if (client_fd < 0) continue;
-
-        // Run accept callback with a new thread
-        pthread_t thread_id;
-        pthread_create(
-            &thread_id,
-            NULL, 
-            (void *(*)(void *))accept_callback, 
-            (void*)(intptr_t)client_fd
-        );
-        pthread_detach(thread_id);
-    }
 }

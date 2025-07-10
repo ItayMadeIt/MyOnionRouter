@@ -1,8 +1,8 @@
 CC = gcc
 AR = ar
-CFLAGS = -Wall -Wextra -std=c11 -m64 -I.
+CFLAGS = -Wall -Wextra -std=c11 -m64 -I. -pthread -D_POSIX_C_SOURCE=200112L 
 
-SRC_DIRS = string_utils
+SRC_DIRS = string_utils sock_utils server_cfg file_utils
 SRC := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 
 BUILD_DIR ?= build

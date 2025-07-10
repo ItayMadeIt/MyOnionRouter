@@ -1,7 +1,9 @@
-#include <configs.h>
-#include <utils/string_utils.h>
+#include <relay.h>
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <utils/string_utils.h>
 
 bool parse_args(const int argc, const char** argv, relay_config_metadata_t** relay_config)
 {
@@ -12,13 +14,13 @@ bool parse_args(const int argc, const char** argv, relay_config_metadata_t** rel
     bool port_found = false;
     bool server_cfg_found = false;
 
-    for (int i = 0; i < argc; i++)
+    for (int i = 1; i < argc; i++)
     {
         if ((strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--port") == 0) && i + 1 < argc)
         {
             i++;
 
-            (*relay_config)->relay_port = clone_str(argv[i]);
+            (*relay_config)->relay_port = (char*)clone_str(argv[i]);
 
             port_found = true;
         }

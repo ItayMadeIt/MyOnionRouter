@@ -1,24 +1,26 @@
 #include <server.h>
 
-#include <utils/string_utils.h>
-#include <encryptions/encryptions.h>
-
-#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
 #include <pthread.h>
-
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <sock_utils.h>
+
+#include <utils/string_utils.h>
+#include <utils/sock_utils.h>
+#include <utils/server_config.h>
+#include <protocol/server_net_structs.h>
+#include <encryptions/encryptions.h>
 
 #define CONNECTIONS_BACKLOG_AMOUNT 16
 #define INPUT_SIZE 128
 
 static int server_fd;
 
+/* 
 static void encryption_test()
 {
     // Initialize encryption (sets up DH globals)
@@ -57,7 +59,7 @@ static void encryption_test()
     free_key(&alice);
     free_key(&bob);
     free_encryption();
-}
+}*/
 
 static void run_server_cmd()
 {
@@ -79,6 +81,16 @@ static void run_server_cmd()
 
 static void client_callback(int client_fd)
 {
+    server_handshake_request_t data;
+    int read_count = read(client_fd, &data, sizeof(server_handshake_request_t));
+    if (read_count == 0)
+    {
+        // Error occured
+        return;
+    }
+
+    printf("Version:%d Type:%d Flags:%d\n", data.version, data.user_type, data.flags);
+
     close(client_fd);
 
     return;
@@ -91,37 +103,41 @@ static void* accept_loop_func(void* _)
     return NULL;
 }
 
-server_code_t run_server(const char* config_fliepath)
+server_code_t run_server(const char* config_filepath)
 {
-    config_metadata_t config;
-    config.port = clone_str("8200");
-    config.server = clone_str("mor.qk");
-    /*
-    if (fetch_config(config_fliepath, &config) == false)
+    server_config_metadata_t* config;
+    if (fetch_server_config(config_filepath, &config) == false)
     {
-        fprintf(stderr, "Invalid path.");
+        // Invalid path
         return server_error;
-    }*/
+    }
 
     // Bind
-    server_fd = create_and_bind(&config);
+    server_fd = create_and_bind(config);
+
     // Listen
     listen(server_fd, CONNECTIONS_BACKLOG_AMOUNT);
 
     // Handle connections
     pthread_t conn_thread_id;
-    pthread_create(
+    int conn_thread_err = pthread_create(
         &conn_thread_id, 
         NULL, 
         accept_loop_func,
         NULL
     );
 
-    run_server_cmd();
+    if (conn_thread_err)
+    {
+        // Invalid thread creation
+        return server_error;
+    }
 
     pthread_detach(conn_thread_id);
 
-    free_config(&config);
+    run_server_cmd();
+    
+    free_server_config(config);
 
     return server_success;
 }

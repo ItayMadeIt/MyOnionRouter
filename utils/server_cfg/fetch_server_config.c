@@ -1,44 +1,21 @@
-#include <configs.h>
+#include "server_config.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
 
-#include <utils/string_utils.h>
+#include <file_utils/file_utils.h>
+#include <string_utils/string_utils.h>
 
 #undef NULL
 #define NULL 0
 
-#define ARGS 2
-
-char* file_to_string(FILE* fd)
+static server_config_metadata_t* str_to_metadata(const char* str)
 {
-    fseek(fd, 0L, SEEK_END);
-    int length = ftell(fd);
+    server_config_metadata_t* result = (server_config_metadata_t*)calloc(1, sizeof(server_config_metadata_t));
 
-    char* str = malloc(length + 1);
-    str[length] = '\0'; 
-
-    fseek(fd, 0, SEEK_SET);
-
-    int bytes = 0;
-    if ((bytes = fread(str, sizeof(char), length, fd)) != length)
-    {
-        fprintf(stderr, "Bytes was not sufficient in it's mission to read bytes.\n");
-        return NULL;
-    }
-
-    return str;
-}
-
-server_config_metadata_t* str_to_metadata(const char* str)
-{
-    server_config_metadata_t* result = (server_config_metadata_t*)malloc(sizeof(server_config_metadata_t));
-    if (result == NULL)
-    {
-        return NULL;
-    }
-    memset(result, NULL, sizeof(server_config_metadata_t));
+    if (result == NULL) return NULL;
 
     char* mutable_str = clone_str(str);
     uint32_t length = strlen(mutable_str);
@@ -78,15 +55,6 @@ server_config_metadata_t* str_to_metadata(const char* str)
     free(mutable_str);
 
     return result;
-}
-
-void free_server_config(server_config_metadata_t* metadata)
-{
-    free(metadata->server);
-    metadata->server = NULL;
-    
-    free(metadata->port);
-    metadata->port = NULL;
 }
 
 bool fetch_server_config(const char* filepath, server_config_metadata_t** metadata)

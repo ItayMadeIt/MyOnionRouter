@@ -1,7 +1,7 @@
 #ifndef __RELAY_H__
 #define __RELAY_H__
 
-#include <configs.h>
+#include <relay_config.h>
 
 typedef enum relay_code
 {

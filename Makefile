@@ -30,21 +30,21 @@ utils:
 		INCLUDE_DIR=../$(INCLUDE_DIR) \
 		DEBUG=$(DEBUG)
 
-client:
+client: encryptions utils
 	$(MAKE) -C $(CLIENT_DIR) \
 		BUILD_DIR=../$(BUILD_DIR)/client \
 		LIB_DIR=../$(LIB_DIR) \
 		INCLUDE_DIR=../$(INCLUDE_DIR) \
 		DEBUG=$(DEBUG)
 
-relay:
+relay: encryptions utils
 	$(MAKE) -C $(RELAY_DIR) \
 		BUILD_DIR=../$(BUILD_DIR)/relay \
 		LIB_DIR=../$(LIB_DIR) \
 		INCLUDE_DIR=../$(INCLUDE_DIR) \
 		DEBUG=$(DEBUG)
 
-server:
+server: encryptions utils
 	$(MAKE) -C $(SERVER_DIR) \
 		BUILD_DIR=../$(BUILD_DIR)/server \
 		LIB_DIR=../$(LIB_DIR) \

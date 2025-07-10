@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define RELAY_ITEMS_MIN_LENGTH 2
 #define RELAY_STACK_MIN_LENGTH 1
