@@ -5,11 +5,22 @@
 #include <stdint.h>
 #include "relay_data_structs.h"
 
+#define SERVER_MSG_SIZE 4096
 #define SERVER_HANDSHAKE_VERSION 1
 #define SERVER_HANDSHAKE_V1_MAGIC "M0R1"
 #define SERVER_HANDSHAKE_V1_MAGIC_LEN (sizeof(SERVER_HANDSHAKE_V1_MAGIC) - 1)
 
-#define SERVER_RELAYS_MAP_AMOUNT 16
+#define SERVER_RELAYS_MAP_AMOUNT ((SERVER_MSG_SIZE - sizeof(uint16_t)*2)/ sizeof(relay_descriptor_t))
+
+typedef struct msg_buffer {
+    uint8_t data[SERVER_MSG_SIZE];
+} msg_buffer_t;
+
+typedef struct server_relay_list {
+    uint16_t relay_amount;
+    relay_descriptor_t relays[SERVER_RELAYS_MAP_AMOUNT];
+
+} __attribute__((packed)) server_relay_list_t;
 
 // User types
 typedef enum prot_server_user_types
@@ -85,7 +96,7 @@ typedef struct server_relay_request_login
 
 typedef struct server_relay_request_signout
 {
-    uint16_t command; // relay login
+    uint16_t command; // relay signout
 
     uint32_t assigned_id; // relay id (from handshake confirmation)
 
@@ -96,11 +107,12 @@ typedef struct server_client_request
     uint16_t command; // Only 1 command now, client request relay map
 } __attribute__((packed)) server_client_request_t;
 
-typedef struct server_relay_list {
-    
-    relay_descriptor_t relays[SERVER_RELAYS_MAP_AMOUNT];
+typedef struct server_client_request_map
+{
+    uint16_t command; // Request relay map
+    server_relay_list_t relays;
+} __attribute__((packed)) server_client_request_map_t;
 
-} __attribute__((packed)) server_relay_list_t;
 
 
 #endif // __SERVER_NET_STRUCTS_H__

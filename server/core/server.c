@@ -20,6 +20,9 @@
 
 static int server_fd;
 
+global_data_t encryption_globals;
+identity_key_t server_id_key;
+
 /* 
 static void encryption_test()
 {
@@ -89,7 +92,24 @@ static void client_callback(int client_fd)
         return;
     }
 
-    printf("Version:%d Type:%d Flags:%d\n", data.version, data.user_type, data.flags);
+    // Only version 1 is supported
+    if (data.version != 1)
+    {
+        return;
+    }
+
+    switch (data.user_type)
+    {
+    case prot_user_type_client:
+        break;
+    
+    case prot_user_type_relay:
+        break;
+
+    default:
+        fprintf(stderr, "Client %d has invalid user type: %d\n", client_fd, data.user_type);
+        return;
+    }
 
     close(client_fd);
 
@@ -111,6 +131,10 @@ server_code_t run_server(const char* config_filepath)
         // Invalid path
         return server_error;
     }
+
+    init_encryption();
+    get_globals(&encryption_globals.g, encryption_globals.p);
+    init_id_key(&server_id_key);
 
     // Bind
     server_fd = create_and_bind(config);
@@ -136,7 +160,10 @@ server_code_t run_server(const char* config_filepath)
     pthread_detach(conn_thread_id);
 
     run_server_cmd();
-    
+
+    free_id_key(&server_id_key);
+    free_encryption();
+
     free_server_config(config);
 
     return server_success;

@@ -1,13 +1,10 @@
 #include "encryptions.h"
+#include "dh/dh.h"
+#include <sha/sha256.h>
 
 #include <stdio.h>
-/*
-typedef struct key_data
-{
-    dh_key asymmetric_key;
-    aes_block128_t symmetric_key; 
-} key_data_t;
-*/
+#include <stdlib.h>
+#include <string.h>
 
 void init_encryption()
 {
@@ -33,44 +30,44 @@ void set_globals(const uint64_t g/*less than 256*/, const uint8_t p[ASYMMETRIC_K
     set_generator_dh(g);
 }
 
-// Allocate space for key
-key_data_t init_key()
+// Allocates identity key
+void init_id_key(identity_key_t* id_key)
 {
-    key_data_t key;
-    dh_key_t dh_key = create_dh_key();
-    key.asymmetric_key = dh_key;
-    
-    memset(&key.symmetric_key, 0, sizeof(key.symmetric_key));
+    create_dh_identity_key(id_key);
+    gen_dh_prime_identity_key(id_key);
+}
 
-    return key;
+void free_id_key(identity_key_t* id_key)
+{
+    free_dh_identity_key(id_key);
+}
+
+// Allocate space for key
+void init_key(key_data_t* key, const identity_key_t* identity)
+{
+    key->identity = identity;
+
+    create_dh_session_key(&key->session, identity);
+
+    memset(&key->symmetric_key, 0, sizeof(key->symmetric_key));
 }
 
 // Frees space for key
 void free_key(key_data_t* key)
 {
-    free_dh_key(&key->asymmetric_key);
-}
-
-// Generates private assymetric keys
-void gen_asymmetric_private_key(key_data_t* key)
-{
-    gen_dh_key_private_prime(&key->asymmetric_key);
-}
-
-// Sets the private key x, and calculates g^x
-void set_asymmetric_private_key(key_data_t* key, const uint8_t private_key[ASYMMETRIC_KEY_BYTES])
-{
-    set_dh_key_private_prime(&key->asymmetric_key, private_key);
+    free_dh_session_key(&key->session);
+    memset(&key->symmetric_key, 0, sizeof(key->symmetric_key));
 }
 
 // Sets g^y and g^xy, sets symmetric key for aes using sha256(g^xy)
 void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_KEY_BYTES])
 {
-    set_dh_key_other_public(&key->asymmetric_key, data);
+    // Set g^y and compute g^xy in session
+    set_dh_key_other_public(&key->session, data);
 
     uint8_t common_key[ASYMMETRIC_KEY_BYTES];
 
-    get_dh_common_key(&key->asymmetric_key, common_key);
+    get_dh_common_key(&key->session, common_key);
 
     uint8_t common_key_sha_buffer[ASYMMETRIC_KEY_BYTES + SHA_PADDING];
     
@@ -79,8 +76,8 @@ void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_K
 
     if (common_key_sha_buffer_len == 0 || common_key_sha_buffer_len > sizeof(common_key_sha_buffer))
     {
-        fprintf(stderr, "Common key couldn't be hashed in `derive_symmetric_key_from_public`: %d\n", common_key_sha_buffer_len);
-        exit(-1);
+        fprintf(stderr, "Common key couldn't be hashed in `derive_symmetric_key_from_public`: %lu\n", common_key_sha_buffer_len);
+        abort();
     }
 
     uint8_t sha_buffer[SHA_BUF_SIZE];

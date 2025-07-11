@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define ENDIAN_MPZ -1
 
@@ -92,7 +93,7 @@ void init_dh()
 void get_prime_dh(uint8_t res[DH_KEY_BYTES])
 {
     export_mpz_fixed(res, p, DH_KEY_BYTES);
-}
+} 
 
 void get_generator_dh(uint64_t* res)
 {
@@ -110,25 +111,39 @@ void set_generator_dh(const uint64_t value)
     mpz_set_ui(g, value);
 }
 
-
 void free_dh()
 {
     mpz_clear(p);
     mpz_clear(g);
 }
 
-dh_key_t create_dh_key()
+void create_dh_identity_key(dh_identity_key_t* id_key)
 {
-    dh_key_t key;
-    mpz_init(key.this_private);
-    mpz_init(key.this_public);
-    mpz_init(key.other_public);
-    mpz_init(key.common_key);
-
-    return key;
+    mpz_init(id_key->this_private);
+    mpz_init(id_key->this_public);
 }
 
-void gen_dh_key_private_prime(dh_key_t* key)
+void create_dh_session_key(dh_session_key_t* session_key, const dh_identity_key_t* identity)
+{
+    session_key->identity = identity;
+
+    mpz_init(session_key->other_public);
+    mpz_init(session_key->common_key);
+}
+
+void free_dh_identity_key(dh_identity_key_t* key)
+{
+    mpz_clear(key->this_private);
+    mpz_clear(key->this_public);
+}
+
+void free_dh_session_key(dh_session_key_t* key)
+{
+    mpz_clear(key->other_public);
+    mpz_clear(key->common_key);
+}
+
+void gen_dh_prime_identity_key(dh_identity_key_t *key)
 {
     // max 2^(DH_KEY_BYTES*8) random prime value
     generate_prime_low_p(key->this_private, DH_KEY_BYTES);
@@ -137,7 +152,7 @@ void gen_dh_key_private_prime(dh_key_t* key)
     mpz_powm(key->this_public, g, key->this_private, p);
 }
 
-void set_dh_key_private_prime(dh_key_t* key, const uint8_t val[DH_KEY_BYTES])
+void set_dh_prime_identity_key(dh_identity_key_t *key, const uint8_t val[DH_KEY_BYTES])
 {
     // max 2^(DH_KEY_BYTES*8) prime value in `val`, x=`val`
     mpz_import(key->this_private, DH_KEY_BYTES, 1, 1, 1, 0, val);
@@ -146,34 +161,22 @@ void set_dh_key_private_prime(dh_key_t* key, const uint8_t val[DH_KEY_BYTES])
     mpz_powm(key->this_public, g, key->this_private, p);
 }
 
-void get_dh_key_private_prime(const dh_key_t* key, uint8_t res[DH_KEY_BYTES])
+void get_dh_public_identity_key(const dh_identity_key_t *key, uint8_t res[DH_KEY_BYTES])
 {
-    export_mpz_fixed(res, key->this_private, DH_KEY_BYTES);
+    export_mpz_fixed(res, key->this_public, DH_KEY_BYTES);
 }
 
-void set_dh_key_other_public(dh_key_t* key, const uint8_t val[DH_KEY_BYTES])
+
+void set_dh_key_other_public(dh_session_key_t* key, const uint8_t val[DH_KEY_BYTES])
 {
     // Import bytes into the mpz_t
     mpz_import(key->other_public, DH_KEY_BYTES, ENDIAN_MPZ, 1, 0, 0, val);
 
     // common_key = (g^y (other_public)) ^ (x(private)) % p => g^xy % p
-    mpz_powm(key->common_key, key->other_public, key->this_private, p);
+    mpz_powm(key->common_key, key->other_public, key->identity->this_private, p);
 }
 
-void get_dh_key_other_public(const dh_key_t* key, uint8_t res[DH_KEY_BYTES])
-{
-    export_mpz_fixed(res, key->other_public, DH_KEY_BYTES);
-}
-
-void get_dh_common_key(const dh_key_t* key, uint8_t res[DH_KEY_BYTES])
+void get_dh_common_key(const dh_session_key_t* key, uint8_t res[DH_KEY_BYTES])
 {
     export_mpz_fixed(res, key->common_key, DH_KEY_BYTES);
-}
-
-void free_dh_key(dh_key_t* key)
-{
-    mpz_clear(key->this_private);
-    mpz_clear(key->this_public);
-    mpz_clear(key->other_public);
-    mpz_clear(key->common_key);
 }
