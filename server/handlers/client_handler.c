@@ -14,7 +14,7 @@ typedef struct client_data
     uint32_t relay_start;
 } client_data_t;
 
-static bool handle_get_relay_map(int sock_fd, client_data_t* client_data, key_data_t* key, msg_buffer_t* buffer)
+static bool handle_get_relay_map(int sock_fd, client_data_t* client_data, key_data_t* key, msg_server_buffer_t* buffer)
 {
     server_relay_list_t relay_list;
 
@@ -25,7 +25,7 @@ static bool handle_get_relay_map(int sock_fd, client_data_t* client_data, key_da
     return send_enc_client_relay_map(sock_fd, key, buffer, &relay_list, server_response_success);
 }
 
-static bool handle_exit(int sock_fd, client_data_t* client_data, key_data_t* key, msg_buffer_t* buffer)
+static bool handle_exit(int sock_fd, client_data_t* client_data, key_data_t* key, msg_server_buffer_t* buffer)
 {    
     (void)client_data; // not used
 
@@ -33,7 +33,7 @@ static bool handle_exit(int sock_fd, client_data_t* client_data, key_data_t* key
 }
 
 
-static bool handle_message(int sock_fd, client_data_t* client_data, key_data_t* key, msg_buffer_t* buffer, bool* running)
+static bool handle_message(int sock_fd, client_data_t* client_data, key_data_t* key, msg_server_buffer_t* buffer, bool* running)
 {
     if (recv_enc_server_msg(sock_fd, buffer, key) == false)
     {
@@ -63,7 +63,7 @@ static bool handle_message(int sock_fd, client_data_t* client_data, key_data_t* 
 }
 
 
-int process_client(int sock_fd, msg_buffer_t* buffer)
+int process_client(int sock_fd, msg_server_buffer_t* buffer)
 {
     if (buffer == NULL)
     {

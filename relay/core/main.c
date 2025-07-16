@@ -34,7 +34,7 @@ int main(int argc, const char *argv[])
 
     if (code != relay_success)
     {
-        fprintf(stderr, "Relay failed");
+        fprintf(stderr, "Relay failed\n");
         return -1;
     }
     

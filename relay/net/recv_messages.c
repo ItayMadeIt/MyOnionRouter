@@ -2,7 +2,7 @@
 #include <protocol/server_net_structs.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <server.h>
+#include <relay.h>
 
 bool recv_server_msg(int sock_fd, msg_server_buffer_t* buffer)
 {
@@ -30,25 +30,25 @@ bool recv_enc_server_msg(int sock_fd, msg_server_buffer_t* buffer, key_data_t* k
     return true;
 }
 
-bool recv_handshake_request(int sock_fd, msg_server_buffer_t* buffer, server_handshake_request_t* req) 
+bool recv_server_handshake_res(int sock_fd, msg_server_buffer_t* buffer, server_handshake_response_t* response)
 {
-    if (recv_server_msg(sock_fd, buffer) == false) 
+    if (recv_server_msg(sock_fd, buffer) == false)
     {
         return false;
     }
 
-    *req = *(server_handshake_request_t*)buffer;
-    return (req->version == 1 &&
-            (req->user_type == prot_user_type_client || req->user_type == prot_user_type_relay));
+    *response = *(server_handshake_response_t*)buffer; 
+
+    return true;
 }
-
-bool recv_handshake_client_key(int sock_fd, msg_server_buffer_t* buffer, server_handshake_client_key_t* client_key) 
+bool recv_server_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, server_handshake_confirmation_t* confirmation)
 {
-    if (recv_server_msg(sock_fd, buffer) == false) 
+    if (recv_enc_server_msg(sock_fd, buffer, key) == false)
     {
         return false;
     }
 
-    *client_key = *(server_handshake_client_key_t*)buffer;
+    *confirmation = *(server_handshake_confirmation_t*)buffer; 
+
     return true;
 }

@@ -24,6 +24,10 @@ typedef struct key_data
     aes_block128_t symmetric_key;
 } key_data_t;
 
+// temp
+void print_block(aes_block128_t* block);
+void print_asymmertic(uint8_t data[ASYMMETRIC_KEY_BYTES]);
+
 void init_encryption();
 void free_encryption();
 

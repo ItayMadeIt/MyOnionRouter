@@ -12,7 +12,7 @@
 #include <time.h>
 #include <unistd.h>
 
-static bool handle_signup(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_buffer_t* buffer)
+static bool handle_signup(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_server_buffer_t* buffer)
 {
     if (*relay_data != NULL)
     {
@@ -30,7 +30,7 @@ static bool handle_signup(int sock_fd, relay_data_t** relay_data, key_data_t* ke
     return send_enc_relay_signup_response(sock_fd, key, buffer, server_response_success, relay_id);
 }
 
-static bool handle_signout(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_buffer_t* buffer)
+static bool handle_signout(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_server_buffer_t* buffer)
 {
     server_relay_request_signout_t* request = (server_relay_request_signout_t*)buffer;
     
@@ -65,7 +65,7 @@ static bool handle_signout(int sock_fd, relay_data_t** relay_data, key_data_t* k
     return send_enc_relay_signout_response(sock_fd, key, buffer, server_response_success);
 }
 
-static bool handle_exit(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_buffer_t* buffer)
+static bool handle_exit(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_server_buffer_t* buffer)
 {
     // No need to access relay data anymore
     *relay_data = NULL;
@@ -73,7 +73,7 @@ static bool handle_exit(int sock_fd, relay_data_t** relay_data, key_data_t* key,
     return send_enc_relay_exit_response(sock_fd, key, buffer, server_response_success);
 }
 
-static bool handle_message(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_buffer_t* buffer, bool* running)
+static bool handle_message(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_server_buffer_t* buffer, bool* running)
 {
     if (recv_enc_server_msg(sock_fd, buffer, key) == false)
     {
@@ -106,7 +106,7 @@ static bool handle_message(int sock_fd, relay_data_t** relay_data, key_data_t* k
     return return_value;
 }
 
-int process_relay(int sock_fd, msg_buffer_t* buffer)
+int process_relay(int sock_fd, msg_server_buffer_t* buffer)
 {
     if (buffer == NULL)
     {

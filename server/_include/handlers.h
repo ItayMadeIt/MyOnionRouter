@@ -7,5 +7,5 @@ typedef enum handler_response {
     handler_error = 1,
 } handler_response_t;
 
-int process_relay (int sock_fd, msg_buffer_t* buffer);
-int process_client(int sock_fd, msg_buffer_t* buffer);
+int process_relay (int sock_fd, msg_server_buffer_t* buffer);
+int process_client(int sock_fd, msg_server_buffer_t* buffer);

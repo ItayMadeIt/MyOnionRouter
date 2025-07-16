@@ -12,9 +12,11 @@
 
 #define SERVER_RELAYS_MAP_AMOUNT ((SERVER_MSG_SIZE - sizeof(uint16_t)*2)/ sizeof(relay_descriptor_t))
 
-typedef struct msg_buffer {
+#define INVALID_RELAY_ID (uint32_t)(~0)
+
+typedef struct msg_server_buffer {
     uint8_t data[SERVER_MSG_SIZE];
-} msg_buffer_t;
+} msg_server_buffer_t;
 
 typedef struct server_relay_list {
     uint16_t relay_amount;

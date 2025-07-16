@@ -36,7 +36,11 @@ static void run_server_cmd()
     while (running)
     {
         char input[INPUT_SIZE];
-        fgets(input, sizeof(input), stdin);
+        if (fgets(input, sizeof(input), stdin) != input)
+        {
+            fprintf(stderr, "Invalid input");
+            break;
+        }
         input[strcspn(input, "\n")] = '\0';
         printf("`%s`\n", input);
     
@@ -49,7 +53,7 @@ static void run_server_cmd()
 
 static void client_callback(user_descriptor_t* user)
 {
-    msg_buffer_t buffer_data;
+    msg_server_buffer_t buffer_data;
     key_data_t session_key;
 
     init_key(&session_key, &server_id_key);
@@ -111,7 +115,9 @@ static void client_callback(user_descriptor_t* user)
 }
 
 static void* accept_loop_func(void* _)
-{
+{   
+    (void)(_);
+
     accept_loop(server_fd, client_callback);
 
     return NULL;
@@ -129,6 +135,7 @@ server_code_t run_server(const char* config_filepath)
     init_encryption();
     get_globals(&encryption_globals.g, encryption_globals.p);
     init_id_key(&server_id_key);
+
 
     init_relay_manager();
     init_socket_context();

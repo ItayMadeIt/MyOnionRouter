@@ -1,20 +1,21 @@
 #include <net_messages.h>
 
 #include <protocol/server_net_structs.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <time.h>
 #include <unistd.h>
 #include <server.h>
 
-bool send_server_msg(int sock_fd, msg_buffer_t* buffer, void* data, uint64_t length)
+bool send_server_msg(int sock_fd, msg_server_buffer_t* buffer, void* data, uint64_t length)
 {
-    memset(buffer, 0, sizeof(msg_buffer_t));
+    memset(buffer, 0, sizeof(msg_server_buffer_t));
 
     memcpy(buffer, data, length);
 
-    int count = send(sock_fd, buffer, sizeof(msg_buffer_t), 0);
-    if (count != sizeof(msg_buffer_t))
+    int count = send(sock_fd, buffer, sizeof(msg_server_buffer_t), 0);
+    if (count != sizeof(msg_server_buffer_t))
     {
         return false;
     }
@@ -22,16 +23,16 @@ bool send_server_msg(int sock_fd, msg_buffer_t* buffer, void* data, uint64_t len
     return true;
 }
 
-bool send_enc_server_msg(int sock_fd, msg_buffer_t* buffer, void* data, uint64_t length, key_data_t* key)
+bool send_enc_server_msg(int sock_fd, msg_server_buffer_t* buffer, void* data, uint64_t length, key_data_t* key)
 {
-    memset(buffer, 0, sizeof(msg_buffer_t));
+    memset(buffer, 0, sizeof(msg_server_buffer_t));
 
     memcpy(buffer, data, length);
 
     symmetric_encrypt(key, (uint8_t*)buffer, length);
 
-    int count = send(sock_fd, buffer, sizeof(msg_buffer_t), 0);
-    if (count != sizeof(msg_buffer_t))
+    int count = send(sock_fd, buffer, sizeof(msg_server_buffer_t), 0);
+    if (count != sizeof(msg_server_buffer_t))
     {
         return false;
     }
@@ -40,7 +41,7 @@ bool send_enc_server_msg(int sock_fd, msg_buffer_t* buffer, void* data, uint64_t
 }
 
 
-bool send_handshake_response(int sock_fd, msg_buffer_t* buffer) 
+bool send_handshake_response(int sock_fd, msg_server_buffer_t* buffer) 
 {
     server_handshake_response_t response;
 
@@ -48,16 +49,11 @@ bool send_handshake_response(int sock_fd, msg_buffer_t* buffer)
     memcpy(response.p, encryption_globals.p, sizeof(response.p));
     get_public_identity_key(&server_id_key, response.server_pubkey);
 
-    if (send_server_msg(sock_fd, buffer, &response, sizeof(response)) == false)
-    {
-        return false;
-    }
-
-    return true;
+    return send_server_msg(sock_fd, buffer, &response, sizeof(response));
 }
 
 
-bool send_handshake_confirmation(int sock_fd, msg_buffer_t* buffer, key_data_t* session_key, uint32_t id) 
+bool send_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* session_key, uint32_t id) 
 {
     server_handshake_confirmation_t confirm;
 
@@ -66,15 +62,10 @@ bool send_handshake_confirmation(int sock_fd, msg_buffer_t* buffer, key_data_t* 
 
     confirm.assigned_id = id;
 
-    if (send_enc_server_msg(sock_fd, buffer, &confirm, sizeof(confirm), session_key) == false)
-    {
-        return false;
-    }
-
-    return true;
+    return send_enc_server_msg(sock_fd, buffer, &confirm, sizeof(confirm), session_key);
 }
 
-bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_buffer_t *buffer, server_responses_t response_type, uint32_t id)
+bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type, uint32_t id)
 {
     server_relay_response_signup_t response = {
         .base.request.command=RELAY_COMMAND_SIGNUP,
@@ -86,7 +77,7 @@ bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_buffer_t *
     return send_enc_server_msg(sock_fd, buffer, &response, sizeof(response), key);
 }
 
-bool send_enc_relay_signout_response(int sock_fd, key_data_t *key, msg_buffer_t *buffer, server_responses_t response_type)
+bool send_enc_relay_signout_response(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_responses_t response_type)
 {
     server_relay_response_signout_t response = {
         .base.request.command=RELAY_COMMAND_SIGNOUT,
@@ -97,7 +88,7 @@ bool send_enc_relay_signout_response(int sock_fd, key_data_t *key, msg_buffer_t 
     return send_enc_server_msg(sock_fd, buffer, &response, sizeof(response), key);
 }
 
-bool send_enc_relay_exit_response(int sock_fd, key_data_t *key, msg_buffer_t *buffer, server_responses_t response_type)
+bool send_enc_relay_exit_response(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_responses_t response_type)
 {
     server_relay_response_exit_t response = {
         .base.request.command=RELAY_COMMAND_EXIT,
@@ -108,7 +99,7 @@ bool send_enc_relay_exit_response(int sock_fd, key_data_t *key, msg_buffer_t *bu
     return send_enc_server_msg(sock_fd, buffer, &response, sizeof(response), key);
 }
 
-bool send_enc_client_relay_map(int sock_fd, key_data_t *key, msg_buffer_t *buffer, server_relay_list_t *list, server_responses_t response_type)
+bool send_enc_client_relay_map(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_relay_list_t *list, server_responses_t response_type)
 {
     server_client_request_map_t response ={
         .base.request.command=CLIENT_COMMAND_GET_RELAY_MAP,
@@ -120,7 +111,7 @@ bool send_enc_client_relay_map(int sock_fd, key_data_t *key, msg_buffer_t *buffe
     return send_enc_server_msg(sock_fd, buffer, &response, sizeof(server_client_request_map_t), key);
 }
 
-bool send_enc_client_exit(int sock_fd, key_data_t *key, msg_buffer_t *buffer, server_responses_t response_type)
+bool send_enc_client_exit(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_responses_t response_type)
 {
     server_client_response_exit_t response = {
         .base.request.command=CLIENT_COMMAND_EXIT,

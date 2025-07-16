@@ -1,5 +1,4 @@
 #include "dh.h"
-#include "source/encryptions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -156,7 +155,7 @@ void gen_dh_prime_identity_key(dh_identity_key_t *key)
 void set_dh_prime_identity_key(dh_identity_key_t *key, const uint8_t val[DH_KEY_BYTES])
 {
     // max 2^(DH_KEY_BYTES*8) prime value in `val`, x=`val`
-    mpz_import(key->this_private, DH_KEY_BYTES, 1, 1, 1, 0, val);
+    mpz_import(key->this_private, DH_KEY_BYTES, ENDIAN_MPZ, 1, 0, 0, val);
 
     // this_public = g^x % p
     mpz_powm(key->this_public, g, key->this_private, p);

@@ -6,6 +6,22 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <gmp.h>
+
+void print_block(aes_block128_t *block)
+{
+    printf("%08X %08X %08X %08X\n", block->columns[0], block->columns[1], block->columns[2], block->columns[3]);
+}
+void print_asymmertic(uint8_t data[ASYMMETRIC_KEY_BYTES])
+{
+    for (uint32_t i = 0; i < ASYMMETRIC_KEY_BYTES/4; i++)
+    {
+        printf("%08X ", data[i * 4]);
+    }
+
+    printf("\n\n");
+}
+
 void init_encryption()
 {
     init_dh();
@@ -78,8 +94,10 @@ void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_K
     uint8_t common_key[ASYMMETRIC_KEY_BYTES];
 
     get_dh_common_key(&key->session, common_key);
-
+    
     uint8_t common_key_sha_buffer[ASYMMETRIC_KEY_BYTES + SHA_PADDING];
+    
+    memcpy(common_key_sha_buffer, common_key, ASYMMETRIC_KEY_BYTES);
     
     uint64_t common_key_sha_buffer_len = 
             hash_prepare_data_sha256(common_key_sha_buffer, ASYMMETRIC_KEY_BYTES, sizeof(common_key_sha_buffer));
