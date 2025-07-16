@@ -59,6 +59,16 @@ void free_key(key_data_t* key)
     memset(&key->symmetric_key, 0, sizeof(key->symmetric_key));
 }
 
+void get_public_identity_key(const identity_key_t* key, uint8_t res[DH_KEY_BYTES])
+{
+    get_dh_public_identity_key(key, res);
+}
+
+void get_other_public_key(const key_data_t* key, uint8_t res[DH_KEY_BYTES])
+{
+    get_dh_key_other_public(&key->session, res);
+}
+
 // Sets g^y and g^xy, sets symmetric key for aes using sha256(g^xy)
 void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_KEY_BYTES])
 {

@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("Start server:\n");
     server_code_t code = run_server(argv[1]);
     
     if (code != server_success)

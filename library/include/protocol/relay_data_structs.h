@@ -26,18 +26,17 @@ typedef struct relay_descriptor {
     // Known public key of relay
     uint8_t public_key[ASYMMETRIC_KEY_BYTES];
 
-    // Unique id for each relay
-    uint32_t relay_id;
-    
 } __attribute__((packed)) relay_descriptor_t;
 
-typedef struct relay_data {
-    // Relay specific data
+// for now relay_data_t is the same as the entire descriptor
+typedef struct relay_data
+{
+    // Descriptor to notify others
     relay_descriptor_t descriptor;
 
-    // Common key
-    uint8_t common_key[SYMMETRIC_KEY_BYTES];
+    // Unique id for each relay
+    uint32_t relay_id;
 
-} __attribute__((packed)) relay_data_t;
+} relay_data_t;
 
 #endif // __RELAY_DATA_STRUCTS_H__

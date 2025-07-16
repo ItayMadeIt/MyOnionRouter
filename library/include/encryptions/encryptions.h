@@ -45,6 +45,12 @@ void init_key(key_data_t* key, const identity_key_t* identity);
 // Frees space for key
 void free_key(key_data_t* key);
 
+// Get g^x from identity key
+void get_public_identity_key(const identity_key_t *key, uint8_t res[DH_KEY_BYTES]);
+
+// Get g^y from session key (other public key)
+void get_other_public_key(const key_data_t* key, uint8_t res[DH_KEY_BYTES]);
+
 // Sets g^y(param) and g^xy, sets symmetric key for aes using sha256(g^xy)
 void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_KEY_BYTES]);
 

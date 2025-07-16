@@ -1,3 +1,4 @@
+#include <netinet/in.h>
 #include <server.h>
 
 #include <stdio.h>
@@ -9,60 +10,24 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include <utils/string_utils.h>
+#include <relay_manager.h>
 #include <utils/sock_utils.h>
-#include <utils/server_config.h>
+#include <utils/string_utils.h>
 #include <protocol/server_net_structs.h>
 #include <encryptions/encryptions.h>
+#include <net_messages.h>
+#include <socket_context.h>
+#include <handlers.h>
 
 #define CONNECTIONS_BACKLOG_AMOUNT 16
 #define INPUT_SIZE 128
+
+const server_handshake_confirmation_t base_confirmation = {SERVER_HANDSHAKE_V1_MAGIC, 0, 0};
 
 static int server_fd;
 
 global_data_t encryption_globals;
 identity_key_t server_id_key;
-
-/* 
-static void encryption_test()
-{
-    // Initialize encryption (sets up DH globals)
-    init_encryption();
-
-    // Generate Alice and Bob key data
-    key_data_t alice = init_key();
-    key_data_t bob = init_key();
-
-    // Generate private keys (and compute g^x)
-    gen_asymmetric_private_key(&alice);
-    gen_asymmetric_private_key(&bob);
-
-    // Export public keys
-    uint8_t alice_pub[ASYMMETRIC_KEY_BYTES] = {0};
-    uint8_t bob_pub[ASYMMETRIC_KEY_BYTES] = {0};
-
-    get_dh_key_other_public(&alice.asymmetric_key, alice_pub);
-    get_dh_key_other_public(&bob.asymmetric_key, bob_pub);
-
-    // Exchange public keys and derive symmetric key
-    derive_symmetric_key_from_public(&alice, bob_pub);
-    derive_symmetric_key_from_public(&bob, alice_pub);
-
-    // Compare symmetric keys
-    if (memcmp(&alice.symmetric_key, &bob.symmetric_key, SYMMETRIC_KEY_BYTES) == 0)
-    {
-        printf("Shared secret matches!\n");
-    }
-    else
-    {
-        printf("Shared secret does NOT match!\n");
-    }
-
-    // Cleanup
-    free_key(&alice);
-    free_key(&bob);
-    free_encryption();
-}*/
 
 static void run_server_cmd()
 {
@@ -82,36 +47,65 @@ static void run_server_cmd()
     }
 }
 
-static void client_callback(int client_fd)
+static void client_callback(user_descriptor_t* user)
 {
-    server_handshake_request_t data;
-    int read_count = read(client_fd, &data, sizeof(server_handshake_request_t));
-    if (read_count == 0)
+    msg_buffer_t buffer_data;
+    key_data_t session_key;
+
+    init_key(&session_key, &server_id_key);
+
+    server_handshake_request_t request;
+    if (recv_handshake_request(user->fd, &buffer_data, &request) == false)
     {
-        // Error occured
+        close(user->fd);
         return;
     }
 
-    // Only version 1 is supported
-    if (data.version != 1)
+    if (send_handshake_response(user->fd, &buffer_data) == false)
     {
+        close(user->fd);
         return;
     }
 
-    switch (data.user_type)
+    server_handshake_client_key_t client_key_msg;
+    if (recv_handshake_client_key(user->fd, &buffer_data, &client_key_msg) == false)
     {
-    case prot_user_type_client:
-        break;
+        close(user->fd);
+        return;
+    }
+
+    derive_symmetric_key_from_public(&session_key, (uint8_t*)client_key_msg.client_pubkey);
+
+    uint32_t id = user->fd;
     
-    case prot_user_type_relay:
-        break;
-
-    default:
-        fprintf(stderr, "Client %d has invalid user type: %d\n", client_fd, data.user_type);
+    if (send_handshake_confirmation(user->fd, &buffer_data, &session_key, id) == false)
+    {
+        close(user->fd);
         return;
     }
+    
+    add_socket(user->fd, &session_key, NULL);
+    
+    switch (request.user_type)
+    {
+        case prot_user_type_relay:
+        {
+            process_relay(user->fd, &buffer_data);
+            break;
+        }
+        case prot_user_type_client:
+        {
+            process_client(user->fd, &buffer_data);
+            break;
+        }
+        default:
+        {
+            fprintf(stderr, "Unknown user type: %d\n", request.user_type);
+            break;
+        }
+    }
 
-    close(client_fd);
+    free(user);
 
     return;
 }
@@ -135,6 +129,9 @@ server_code_t run_server(const char* config_filepath)
     init_encryption();
     get_globals(&encryption_globals.g, encryption_globals.p);
     init_id_key(&server_id_key);
+
+    init_relay_manager();
+    init_socket_context();
 
     // Bind
     server_fd = create_and_bind(config);
@@ -160,6 +157,9 @@ server_code_t run_server(const char* config_filepath)
     pthread_detach(conn_thread_id);
 
     run_server_cmd();
+
+    free_socket_context();
+    free_relay_manager();
 
     free_id_key(&server_id_key);
     free_encryption();

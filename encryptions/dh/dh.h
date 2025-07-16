@@ -40,6 +40,7 @@ void gen_dh_prime_identity_key(dh_identity_key_t* key);
 void set_dh_prime_identity_key(dh_identity_key_t* key, const uint8_t val[DH_KEY_BYTES]);
 void get_dh_public_identity_key(const dh_identity_key_t* key, uint8_t res[DH_KEY_BYTES]);
 
+void get_dh_key_other_public(const dh_session_key_t *key, uint8_t res[DH_KEY_BYTES]);
 void set_dh_key_other_public(dh_session_key_t* key, const uint8_t val[DH_KEY_BYTES]);
 void get_dh_common_key(const dh_session_key_t* key, uint8_t res[DH_KEY_BYTES]);
 

@@ -1,4 +1,5 @@
 #include "dh.h"
+#include "source/encryptions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -164,6 +165,11 @@ void set_dh_prime_identity_key(dh_identity_key_t *key, const uint8_t val[DH_KEY_
 void get_dh_public_identity_key(const dh_identity_key_t *key, uint8_t res[DH_KEY_BYTES])
 {
     export_mpz_fixed(res, key->this_public, DH_KEY_BYTES);
+}
+
+void get_dh_key_other_public(const dh_session_key_t *key, uint8_t res[DH_KEY_BYTES])
+{
+    export_mpz_fixed(res, key->other_public, DH_KEY_BYTES);
 }
 
 

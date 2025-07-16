@@ -61,7 +61,7 @@ typedef struct server_handshake_confirmation
     // Magic (changes each version, for 1: "M0R1"-SERVER_HANDSHAKE_V1_MAGIC)
     uint8_t magic[SERVER_HANDSHAKE_V1_MAGIC_LEN];
     
-    // Only meaningful for relays (for clients may be used, for now = 0)
+    // Doesn't mean anything, for now sock_fd
     uint32_t assigned_id;
 
     // Time it was sent
@@ -69,50 +69,115 @@ typedef struct server_handshake_confirmation
 
 } __attribute__((packed)) server_handshake_confirmation_t;
 
-const server_handshake_confirmation_t base_confirmation = {SERVER_HANDSHAKE_V1_MAGIC, 0, 0};
+extern const server_handshake_confirmation_t base_confirmation;
 
 typedef enum relay_command_t {
-    RELAY_COMMAND_LOGIN   = 1,
-    RELAY_COMMAND_SIGNOUT = 2
+    RELAY_COMMAND_SIGNUP  = 1,
+    RELAY_COMMAND_SIGNOUT = 2,
+    RELAY_COMMAND_EXIT    = 3,
 } relay_command_t;
 
 typedef enum client_command_t {
-    CLIENT_COMMAND_GET_RELAY_MAP = 1
+    CLIENT_COMMAND_GET_RELAY_MAP = 1,
+    CLIENT_COMMAND_EXIT    = 2,
 } client_command_t;
 
 
 typedef struct server_relay_request
 {
-    uint16_t command; // Only 2 commands now, relay login, relay signout
+    uint16_t command; // Only 2 commands now, relay signup, relay signout
 } __attribute__((packed)) server_relay_request_t;
 
-typedef struct server_relay_request_login
+typedef struct server_relay_request_signup
 {
-    uint16_t command; // relay login
+    server_relay_request_t base; // relay signup
 
     relay_sock_addr_t relay_addr;
 
-} __attribute__((packed)) server_relay_request_login_t;
+} __attribute__((packed)) server_relay_request_signup_t;
 
 typedef struct server_relay_request_signout
 {
-    uint16_t command; // relay signout
+    server_relay_request_t base; // relay signout
 
     uint32_t assigned_id; // relay id (from handshake confirmation)
 
 } __attribute__((packed)) server_relay_request_signout_t;
+typedef struct server_relay_request_exit
+{
+    server_relay_request_t base; // relay exit
+
+} __attribute__((packed)) server_relay_request_exit_t;
+
+
+typedef struct server_relay_response_base
+{
+    uint64_t timestamp;
+    
+    uint32_t response_code;
+
+    server_relay_request_t request;
+
+} __attribute__((packed)) server_relay_response_base_t;
+
+
+typedef struct server_relay_response_signup
+{
+    server_relay_response_base_t base;
+
+    uint64_t id;
+
+} __attribute__((packed)) server_relay_response_signup_t;
+
+typedef struct server_relay_response_signout
+{
+    server_relay_response_base_t base;
+
+} __attribute__((packed)) server_relay_response_signout_t;
+
+typedef struct server_relay_response_exit
+{
+    server_relay_response_base_t base;
+
+} __attribute__((packed)) server_relay_response_exit_t;
+
+
+
+
+
 
 typedef struct server_client_request
 {
     uint16_t command; // Only 1 command now, client request relay map
 } __attribute__((packed)) server_client_request_t;
 
-typedef struct server_client_request_map
+
+typedef struct server_client_response_base
 {
-    uint16_t command; // Request relay map
+    uint64_t timestamp;
+    
+    uint32_t response_code;
+
+    server_client_request_t request;
+
+} __attribute__((packed)) server_client_response_base_t;
+
+typedef struct server_client_response_map
+{
+    server_client_response_base_t base;
     server_relay_list_t relays;
 } __attribute__((packed)) server_client_request_map_t;
 
+typedef struct server_client_response_exit
+{
+    server_client_response_base_t base;
+} __attribute__((packed)) server_client_response_exit_t;
+
+typedef enum server_responses
+{
+    server_response_success = 0,
+    server_response_base_error = 1,
+} server_responses_t;
 
 
 #endif // __SERVER_NET_STRUCTS_H__
