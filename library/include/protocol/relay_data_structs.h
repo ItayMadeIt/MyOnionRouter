@@ -9,7 +9,7 @@
 #define IP6_SIZE 16
 #define IP4_SIZE 4
 
-typedef struct relay_sock_addr {
+typedef struct sock_addr {
     
     uint8_t family;   // AF_INET, AF_INET6
     uint8_t protocol; // currently only support TCP
@@ -17,11 +17,11 @@ typedef struct relay_sock_addr {
     uint8_t addr[MAX(IP4_SIZE, IP6_SIZE)]; // addr, ipv6 or ipv4
     uint16_t port;
 
-} __attribute__((packed)) relay_sock_addr_t;
+} __attribute__((packed)) sock_addr_t;
 
 typedef struct relay_descriptor {
 
-    relay_sock_addr_t sock_addr;
+    sock_addr_t sock_addr;
 
     // Known public key of relay
     uint8_t public_key[ASYMMETRIC_KEY_BYTES];

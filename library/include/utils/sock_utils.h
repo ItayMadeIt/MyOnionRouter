@@ -15,7 +15,7 @@ typedef struct user_descriptor {
 
 // Creates a socket and binds it using config
 //  returns new sockfd if success, otherwise -1
-int create_and_bind(const server_config_metadata_t* config);
+int create_and_bind(const server_config_metadata_t *config, struct sockaddr_storage* bind_addr);
 
 // Runs an infinite synchronous loop that accepts client, 
 //  each client gets it's fd called in an accept callback function. 

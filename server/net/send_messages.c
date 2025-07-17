@@ -29,7 +29,7 @@ bool send_enc_server_msg(int sock_fd, msg_server_buffer_t* buffer, void* data, u
 
     memcpy(buffer, data, length);
 
-    symmetric_encrypt(key, (uint8_t*)buffer, length);
+    symmetric_encrypt(key, (uint8_t*)buffer, sizeof(msg_server_buffer_t));
 
     int count = send(sock_fd, buffer, sizeof(msg_server_buffer_t), 0);
     if (count != sizeof(msg_server_buffer_t))

@@ -8,7 +8,7 @@ key_data_t session_server_key;
 identity_key_t id_relay_key;
 key_data_t session_relay_key;
 
-int main()
+int main(int argc, char** argv)
 {
     printf("Client\n");
 

@@ -1,3 +1,6 @@
+#ifndef __NET_MESSAGES_H__
+#define __NET_MESSAGES_H__
+
 #include <encryptions/encryptions.h>
 #include <protocol/server_net_structs.h>
 #include <stdbool.h>
@@ -21,3 +24,5 @@ bool send_enc_relay_exit_response(int sock_fd, key_data_t* key, msg_server_buffe
 
 bool send_enc_client_relay_map(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_relay_list_t* list, server_responses_t response_type);
 bool send_enc_client_exit(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_responses_t response_type);
+
+#endif // __NET_MESSAGES_H__

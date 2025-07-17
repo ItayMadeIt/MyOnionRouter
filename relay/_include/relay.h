@@ -13,7 +13,9 @@ typedef enum relay_code
 typedef struct relay_vars
 {
     identity_key_t key;
+    key_data_t server_key;
     uint32_t register_id;
+    bool is_key_init;
     const relay_config_metadata_t* config;
 
 } relay_vars_t;

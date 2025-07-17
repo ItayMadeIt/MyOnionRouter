@@ -94,7 +94,7 @@ typedef struct server_relay_request_signup
 {
     server_relay_request_t base; // relay signup
 
-    relay_sock_addr_t relay_addr;
+    sock_addr_t relay_addr;
 
 } __attribute__((packed)) server_relay_request_signup_t;
 

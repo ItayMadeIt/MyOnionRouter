@@ -136,12 +136,11 @@ server_code_t run_server(const char* config_filepath)
     get_globals(&encryption_globals.g, encryption_globals.p);
     init_id_key(&server_id_key);
 
-
     init_relay_manager();
     init_socket_context();
 
     // Bind
-    server_fd = create_and_bind(config);
+    server_fd = create_and_bind(config, NULL);
 
     // Listen
     listen(server_fd, CONNECTIONS_BACKLOG_AMOUNT);

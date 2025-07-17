@@ -1,5 +1,12 @@
-#include <relay.h>
+#ifndef __SERVER_REGISTER_H__
+#define __SERVER_REGISTER_H__
 
-relay_code_t signup_server();
+#include <relay.h>
+#include <protocol/relay_data_structs.h>
+#include <sys/socket.h>
+
+relay_code_t signup_server(struct sockaddr_storage* sock_addr);
 relay_code_t signout_server();
 
+
+#endif // __SERVER_REGISTER_H__

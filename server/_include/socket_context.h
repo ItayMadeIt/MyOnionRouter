@@ -1,3 +1,6 @@
+#ifndef __SOCKET_CONTEXT_H__
+#define __SOCKET_CONTEXT_H__
+
 #include <encryptions/encryptions.h>
 
 typedef struct key_sock {
@@ -24,3 +27,4 @@ void free_sock_data(int sock_fd, void(*free_data)(void*));
 void free_socket(int sock_fd, void(*free_data)(void*));
 
 bool free_socket_context();
+#endif // __SOCKET_CONTEXT_H__

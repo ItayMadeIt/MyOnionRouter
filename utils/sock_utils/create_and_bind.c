@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-int create_and_bind(const server_config_metadata_t* config)
+int create_and_bind(const server_config_metadata_t *config, struct sockaddr_storage* bind_addr)
 {
     struct addrinfo hints, *res;
 
@@ -43,6 +43,11 @@ int create_and_bind(const server_config_metadata_t* config)
         // bind() failed
         freeaddrinfo(res);
         return -1;
+    }
+
+    if (bind_addr != NULL)
+    {
+        memcpy(bind_addr, res->ai_addr, res->ai_addrlen);
     }
 
     freeaddrinfo(res);

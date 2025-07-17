@@ -5,8 +5,6 @@
 #include <stdbool.h>
 #include <protocol/relay_data_structs.h>
 
-#define INVALID_RELAY_ID (~0u)
-
 typedef struct relay_data_item
 {
     bool exists;

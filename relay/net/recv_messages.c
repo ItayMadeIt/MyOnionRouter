@@ -41,6 +41,7 @@ bool recv_server_handshake_res(int sock_fd, msg_server_buffer_t* buffer, server_
 
     return true;
 }
+
 bool recv_server_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, server_handshake_confirmation_t* confirmation)
 {
     if (recv_enc_server_msg(sock_fd, buffer, key) == false)
@@ -49,6 +50,40 @@ bool recv_server_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer
     }
 
     *confirmation = *(server_handshake_confirmation_t*)buffer; 
+
+    return true;
+}
+
+bool recv_server_signup_res(int sock_fd, msg_server_buffer_t *buffer, key_data_t *key, uint32_t *id)
+{
+    if (recv_enc_server_msg(sock_fd, buffer, key) == false)
+    {
+        return false;
+    }
+
+    server_relay_response_signup_t* response = (server_relay_response_signup_t*)buffer;
+
+    *id = response->id; 
+
+    return true;
+}
+
+bool recv_server_signout_res(int sock_fd, msg_server_buffer_t *buffer, key_data_t *key)
+{
+    if (recv_enc_server_msg(sock_fd, buffer, key) == false)
+    {
+        return false;
+    } 
+
+    return true;
+}
+
+bool recv_server_exit_res(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key)
+{
+    if (recv_enc_server_msg(sock_fd, buffer, key) == false)
+    {
+        return false;
+    }
 
     return true;
 }

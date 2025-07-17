@@ -23,7 +23,7 @@ static bool handle_signup(int sock_fd, relay_data_t** relay_data, key_data_t* ke
 
     *relay_data = gen_relay();
     get_other_public_key(key, (*relay_data)->descriptor.public_key);
-    memcpy(&(*relay_data)->descriptor.sock_addr, &request.relay_addr, sizeof(relay_sock_addr_t));
+    memcpy(&(*relay_data)->descriptor.sock_addr, &request.relay_addr, sizeof(sock_addr_t));
 
     uint32_t relay_id = (*relay_data)->relay_id;
 
@@ -56,6 +56,8 @@ static bool handle_signout(int sock_fd, relay_data_t** relay_data, key_data_t* k
 
     if (memcmp((*relay_data)->descriptor.public_key, true_public_key, ASYMMETRIC_KEY_BYTES) != 0)
     {
+        print_asymmertic((*relay_data)->descriptor.public_key);
+        print_asymmertic(true_public_key);
         return send_enc_relay_signout_response(sock_fd, key, buffer, server_response_base_error);
     }
 
