@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -m64 -I_include -I$(INCLUDE_DIR) 
-SRC_DIRS = core
+SRC_DIRS = core services
 
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
 OBJ = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))

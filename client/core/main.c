@@ -1,43 +1,42 @@
+#include <client.h>
+
+#include <client_config.h>
+
 #include <stdio.h>
-#include <encryptions/encryptions.h>
-#include <string.h>
+#include <stdlib.h>
 
-identity_key_t id_server_key;
-key_data_t session_server_key;
+#define MIN_ARGS 2
+#define MAX_ARGS 4
 
-identity_key_t id_relay_key;
-key_data_t session_relay_key;
+client_vars_t client_vars;
 
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
-    printf("Client\n");
+    if (MIN_ARGS > argc || argc > MAX_ARGS)
+    {
+        fprintf(stderr, "Usage: client <config_file> [-r <relays> | --relays <relays>]\n");
+        return -1;
+    }
 
-    init_encryption();
-    uint64_t g;
-    uint8_t p[ASYMMETRIC_KEY_BYTES];
-
-
-    init_id_key(&id_server_key);
+    // Parse args into a client_config
+    client_config_metadata_t* client_config;
+    parse_args(argc, argv, &client_config);
+    if (client_config == NULL)
+    {
+        fprintf(stderr, "Usage: client <config_file> [-r <relays> | --relays <relays>]\n");
+        return -1;
+    }
     
-    get_globals(&g, p);
-    set_globals(g,p);
+    client_code_t code = run_client(client_config);
 
-    init_id_key(&id_relay_key);
+    free(client_config);
+    client_config = NULL;
 
-    init_key(&session_server_key, &id_server_key);
-    init_key(&session_relay_key, &id_relay_key);
-
-    uint8_t relay_public_key[ASYMMETRIC_KEY_BYTES];
-    get_public_identity_key(&id_relay_key, relay_public_key);
-    
-    uint8_t server_public_key[ASYMMETRIC_KEY_BYTES];
-    get_public_identity_key(&id_server_key, server_public_key);
-
-    derive_symmetric_key_from_public(&session_relay_key, server_public_key);
-    derive_symmetric_key_from_public(&session_server_key,relay_public_key);
-
-    int result = memcmp(&session_relay_key.symmetric_key, &session_server_key.symmetric_key, SYMMETRIC_KEY_BYTES); 
-    printf("%d\n", result);
+    if (code != client_success)
+    {
+        fprintf(stderr, "Client failed\n");
+        return -1;
+    }
 
     return 0;
 }

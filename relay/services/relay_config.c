@@ -1,4 +1,4 @@
-#include <relay.h>
+#include <relay_config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
