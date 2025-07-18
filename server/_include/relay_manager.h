@@ -29,6 +29,6 @@ relay_data_t* gen_relay();
 bool remove_relay(uint32_t id);
 
 // Gets a `max` amount of relays
-uint32_t get_relay_batch(relay_descriptor_t* out, uint32_t start, uint32_t max);
+uint32_t get_relay_batch(relay_descriptor_t* out, uint32_t* start, uint32_t max);
 
 #endif // __RELAY_MANAGER_H__

@@ -92,14 +92,14 @@ static void client_callback(user_descriptor_t* user)
     
     switch (request.user_type)
     {
-        case prot_user_type_relay:
-        {
-            process_relay(user->fd, &buffer_data);
-            break;
-        }
         case prot_user_type_client:
         {
             process_client(user->fd, &buffer_data);
+            break;
+        }
+        case prot_user_type_relay:
+        {
+            process_relay(user->fd, &buffer_data);
             break;
         }
         default:

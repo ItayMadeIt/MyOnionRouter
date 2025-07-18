@@ -105,10 +105,12 @@ bool send_enc_client_relay_map(int sock_fd, key_data_t *key, msg_server_buffer_t
         .base.request.command=CLIENT_COMMAND_GET_RELAY_MAP,
         .base.timestamp=time(NULL),
         .base.response_code=response_type,
-        .relays = *list,
     };
 
-    return send_enc_server_msg(sock_fd, buffer, &response, sizeof(server_client_request_map_t), key);
+    response.relays.relay_amount = list->relay_amount;
+    memcpy(&response.relays.relays, &list->relays, sizeof(relay_descriptor_t) * SERVER_RELAYS_MAP_AMOUNT);
+
+    return send_enc_server_msg(sock_fd, buffer, &response, sizeof(server_client_response_map_t), key);
 }
 
 bool send_enc_client_exit(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_responses_t response_type)

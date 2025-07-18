@@ -15,6 +15,7 @@ static client_code_t handle_handshake(int sock_fd, msg_server_buffer_t* buffer, 
 {
     if (send_server_handshake_req(sock_fd, buffer) == false)
     {
+        printf("Failure send req\n");
         close(sock_fd);
         return client_error;
     }
@@ -60,7 +61,7 @@ static client_code_t handle_handshake(int sock_fd, msg_server_buffer_t* buffer, 
         return client_error;
     }
 
-    return client_error;
+    return client_success;
 }
 
 static client_code_t handle_fetch_relay_map(int sock_fd, msg_server_buffer_t* buffer, key_data_t* server_key, server_relay_list_t* list)
@@ -112,20 +113,25 @@ client_code_t gather_relay_map(server_relay_list_t* relay_list)
     server_key.identity = &client_vars.id_key;
     
     client_code_t response = handle_handshake(sock_fd, &buffer, &server_key);
+    printf("%d response\n", response);
     if (response != client_success)
     {
+        printf("%d stop!\n", response);
         free_key(&server_key);
         return response;
     }
 
     response = handle_fetch_relay_map(sock_fd, &buffer, &server_key, relay_list);
+    printf("%d response\n", response);
     if (response != client_success)
     {
+        printf("%d stop!\n", response);
         free_key(&server_key);
         return response;
     }
 
     response = handle_exit(sock_fd, &buffer, &server_key);
+    printf("%d response\n", response);
 
     free_key(&server_key);
     close(sock_fd);

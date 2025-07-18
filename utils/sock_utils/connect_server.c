@@ -14,12 +14,9 @@ int connect_server(const server_config_metadata_t* config)
     hints.ai_family = AF_UNSPEC;  // IPv4 or IPv6
     hints.ai_socktype = SOCK_STREAM;
 
-    printf("Config:");
-    printf(" %s:%s\n", config->server, config->port);
     int err = getaddrinfo(config->server, config->port, &hints, &res);
     if (err != 0) 
     {
-        printf("getaddrinfo failed: %s\n", gai_strerror(err));
         return -1;
     }
 
@@ -37,8 +34,6 @@ int connect_server(const server_config_metadata_t* config)
             close(sock_fd);
             continue;
         }
-
-        printf("Managed to connect to port %s...\n", config->port);
 
         freeaddrinfo(res);
     

@@ -1,4 +1,5 @@
 #include "relay_manager.h"
+
 #include <handlers.h>
 
 #include <encryptions/encryptions.h>
@@ -17,8 +18,7 @@ typedef struct client_data
 static bool handle_get_relay_map(int sock_fd, client_data_t* client_data, key_data_t* key, msg_server_buffer_t* buffer)
 {
     server_relay_list_t relay_list;
-
-    relay_list.relay_amount = get_relay_batch(relay_list.relays, client_data->relay_start, SERVER_RELAYS_MAP_AMOUNT);
+    relay_list.relay_amount = get_relay_batch(relay_list.relays, &client_data->relay_start, SERVER_RELAYS_MAP_AMOUNT);
 
     client_data->relay_start += relay_list.relay_amount; // Not correct calculation, will work now for simplcity
  

@@ -41,7 +41,7 @@ bool send_server_handshake_req(int sock_fd, msg_server_buffer_t* buffer)
 {
     server_handshake_request_t data = {
         .version = 1,
-        .user_type = prot_user_type_relay,
+        .user_type = prot_user_type_client,
         .flags = 0
     };
 

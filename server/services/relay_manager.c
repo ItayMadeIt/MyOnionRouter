@@ -179,24 +179,27 @@ bool remove_relay(uint32_t id)
     return true;
 }
 
-uint32_t get_relay_batch(relay_descriptor_t* out, uint32_t start, uint32_t max) 
+uint32_t get_relay_batch(relay_descriptor_t* out, uint32_t* start, uint32_t max) 
 {
     pthread_mutex_lock(&relay_manager_thread);
 
     uint32_t found = 0;
+    uint32_t i = *start % items_length;
+    uint32_t count = 0;
 
-    for (uint32_t i = start%items_length; found < max; i=(i+1)%items_length) 
+
+    while (found < max && count < items_length) 
     {
         if (items[i].exists) 
         {
             memcpy(&out[found++], &items[i].data->descriptor, sizeof(relay_descriptor_t));
         }
 
-        if (i == start-1) // Incomplete check
-        {
-            break;
-        }
+        i = (i + 1) % items_length;
+        count++;
     }
+
+    *start = i;
 
     pthread_mutex_unlock(&relay_manager_thread);
 

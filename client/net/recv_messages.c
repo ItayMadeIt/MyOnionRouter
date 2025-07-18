@@ -1,5 +1,6 @@
 #include <net_messages.h>
 #include <protocol/server_net_structs.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -62,7 +63,8 @@ bool recv_server_relay_map_res(int sock_fd, msg_server_buffer_t* buffer, key_dat
 
     server_client_response_map_t* response = (server_client_response_map_t*)buffer;
 
-    *list = response->relays;
+    list->relay_amount = response->relays.relay_amount;
+    memcpy(&list->relays, &response->relays.relays, sizeof(relay_descriptor_t) * SERVER_RELAYS_MAP_AMOUNT);
 
     return true;
 }
