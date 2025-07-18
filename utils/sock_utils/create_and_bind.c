@@ -23,6 +23,7 @@ int create_and_bind(const server_config_metadata_t *config, struct sockaddr_stor
     if (getaddrinfo(NULL, config->port, &hints, &res) != 0) 
     {
         // getaddrinfo() failed
+        printf("Failed to getaddr on %s...\n", config->port);
         return -1;
     }
 
@@ -31,6 +32,7 @@ int create_and_bind(const server_config_metadata_t *config, struct sockaddr_stor
     if (sock_fd == -1)
     {
         // socket() failed
+        printf("Failed to create socket %s...\n", config->port);
         freeaddrinfo(res);
         return -1;
     }
@@ -41,6 +43,7 @@ int create_and_bind(const server_config_metadata_t *config, struct sockaddr_stor
     if (bind(sock_fd, res->ai_addr, res->ai_addrlen) == -1)
     {
         // bind() failed
+        printf("Failed to bind on %s...\n", config->port);
         freeaddrinfo(res);
         return -1;
     }
@@ -49,6 +52,8 @@ int create_and_bind(const server_config_metadata_t *config, struct sockaddr_stor
     {
         memcpy(bind_addr, res->ai_addr, res->ai_addrlen);
     }
+
+    printf("Listening on port %s...\n", config->port);
 
     freeaddrinfo(res);
     return sock_fd;

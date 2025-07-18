@@ -1,10 +1,17 @@
-#include "client.h"
+#include <client.h>
+
+#include <server_query.h>
 #include <stdio.h>
 
-client_code_t run_client(const client_config_metadata_t* client_config)
+client_code_t run_client()
 {
-    printf("relays: %d\n", client_config->relays);
-    printf("server: %s:%s\n", client_config->server_cfg->server, client_config->server_cfg->port);
+    init_encryption();
+
+    gather_relay_map(&client_vars.relays);
+
+    printf("%d < %d", client_vars.relays.relay_amount, client_vars.config->relays);
+
+    free_encryption();
 
     return client_success;
 }

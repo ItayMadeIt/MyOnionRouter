@@ -105,6 +105,7 @@ typedef struct server_relay_request_signout
     uint32_t assigned_id; // relay id (from handshake confirmation)
 
 } __attribute__((packed)) server_relay_request_signout_t;
+
 typedef struct server_relay_request_exit
 {
     server_relay_request_t base; // relay exit
@@ -153,6 +154,18 @@ typedef struct server_client_request
     uint16_t command; // Only 1 command now, client request relay map
 } __attribute__((packed)) server_client_request_t;
 
+typedef struct server_client_request_map
+{
+    server_relay_request_t base; // request relay map
+
+} __attribute__((packed)) server_client_request_map_t;
+
+typedef struct server_client_request_exit
+{
+    server_relay_request_t base; // client exit
+
+} __attribute__((packed)) server_client_request_exit_t;
+
 
 typedef struct server_client_response_base
 {
@@ -168,7 +181,7 @@ typedef struct server_client_response_map
 {
     server_client_response_base_t base;
     server_relay_list_t relays;
-} __attribute__((packed)) server_client_request_map_t;
+} __attribute__((packed)) server_client_response_map_t;
 
 typedef struct server_client_response_exit
 {

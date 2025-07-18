@@ -129,6 +129,7 @@ server_code_t run_server(const char* config_filepath)
     if (fetch_server_config(config_filepath, &config) == false)
     {
         // Invalid path
+        printf("Invalid config file\n");
         return server_error;
     }
 
@@ -139,8 +140,13 @@ server_code_t run_server(const char* config_filepath)
     init_relay_manager();
     init_socket_context();
 
+    printf("Create and bind:\n");
     // Bind
     server_fd = create_and_bind(config, NULL);
+    if (server_fd == -1)
+    {
+        printf("Failed to bind on %s:%s", config->server, config->port);
+    }
 
     // Listen
     listen(server_fd, CONNECTIONS_BACKLOG_AMOUNT);

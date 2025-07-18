@@ -26,8 +26,10 @@ int main(int argc, const char** argv)
         fprintf(stderr, "Usage: client <config_file> [-r <relays> | --relays <relays>]\n");
         return -1;
     }
-    
-    client_code_t code = run_client(client_config);
+
+    client_vars.config = client_config;
+
+    client_code_t code = run_client();
 
     free(client_config);
     client_config = NULL;

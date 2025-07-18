@@ -149,6 +149,7 @@ relay_code_t signup_server(struct sockaddr_storage* sock_storage)
 
     if (relay_vars.register_id != INVALID_RELAY_ID)
     {
+        printf("Invalid id\n");
         return relay_error;
     }
 
@@ -156,12 +157,14 @@ relay_code_t signup_server(struct sockaddr_storage* sock_storage)
 
     if (sock_fd == -1)
     {
+        printf("Failed connection\n");
         return relay_error;
     }
 
     relay_code_t response = handle_handshake(sock_fd, &buffer);
     if (response != relay_success)
     {
+        printf("Failed handshake\n");
         return response;
     }
 
@@ -171,6 +174,7 @@ relay_code_t signup_server(struct sockaddr_storage* sock_storage)
     response = handle_signup(sock_fd, &buffer, &sock_addr, &relay_vars.register_id);
     if (response != relay_success)
     {
+        printf("Failed signup\n");
         return response;
     }
 

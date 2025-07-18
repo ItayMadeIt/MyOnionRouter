@@ -101,7 +101,7 @@ bool send_enc_relay_exit_response(int sock_fd, key_data_t *key, msg_server_buffe
 
 bool send_enc_client_relay_map(int sock_fd, key_data_t *key, msg_server_buffer_t *buffer, server_relay_list_t *list, server_responses_t response_type)
 {
-    server_client_request_map_t response ={
+    server_client_response_map_t response ={
         .base.request.command=CLIENT_COMMAND_GET_RELAY_MAP,
         .base.timestamp=time(NULL),
         .base.response_code=response_type,
