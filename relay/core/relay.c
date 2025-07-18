@@ -16,7 +16,7 @@ relay_code_t run_relay(const relay_config_metadata_t* relay_config)
     
     // Bind as a server
     struct sockaddr_storage sockaddr;
-    create_and_bind(relay_config->server_cfg, &sockaddr);
+    relay_vars.sock_fd = create_and_bind(&relay_config->relay_server_cfg, &sockaddr);
 
     relay_vars.register_id = INVALID_RELAY_ID;
 
@@ -40,6 +40,7 @@ relay_code_t run_relay(const relay_config_metadata_t* relay_config)
     }
 
     free_key(&relay_vars.server_key);
+    close(relay_vars.sock_fd);
 
     return relay_success;
 }

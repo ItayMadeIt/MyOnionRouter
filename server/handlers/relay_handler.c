@@ -75,7 +75,6 @@ static bool handle_exit(int sock_fd, relay_data_t** relay_data, key_data_t* key,
 
 static bool handle_message(int sock_fd, relay_data_t** relay_data, key_data_t* key, msg_server_buffer_t* buffer, bool* running)
 {
-    printf("Handle relay: %d\n", sock_fd);
     if (recv_enc_server_msg(sock_fd, buffer, key) == false)
     {
         return false;   

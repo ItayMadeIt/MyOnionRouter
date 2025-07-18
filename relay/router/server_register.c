@@ -153,7 +153,7 @@ relay_code_t signup_server(struct sockaddr_storage* sock_storage)
         return relay_error;
     }
 
-    int sock_fd = connect_server(relay_vars.config->server_cfg);
+    int sock_fd = connect_server(&relay_vars.config->dir_server_cfg);
 
     if (sock_fd == -1)
     {
@@ -196,7 +196,7 @@ relay_code_t signout_server()
         return relay_error;
     }
 
-    int sock_fd = connect_server(relay_vars.config->server_cfg);
+    int sock_fd = connect_server(&relay_vars.config->dir_server_cfg);
 
     if (sock_fd == -1)
     {

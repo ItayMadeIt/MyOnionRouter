@@ -7,12 +7,12 @@
 
 typedef struct client_config_metadata
 {
-    server_config_metadata_t* server_cfg;
+    server_config_metadata_t server_cfg;
 
     uint8_t relays; 
 
 } client_config_metadata_t;
 
-bool parse_args(const int argc, const char** argv, client_config_metadata_t** client_config);
+bool parse_args(const int argc, const char** argv, client_config_metadata_t* client_config);
 
 #endif // __CLIENT_CONFIG_H__

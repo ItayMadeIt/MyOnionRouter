@@ -8,9 +8,9 @@
 
 typedef struct relay_config_metadata
 {
-    server_config_metadata_t* server_cfg;
+    server_config_metadata_t dir_server_cfg;
 
-    char* relay_port;
+    server_config_metadata_t relay_server_cfg;
 
 } relay_config_metadata_t;
 

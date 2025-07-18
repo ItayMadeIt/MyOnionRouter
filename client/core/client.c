@@ -3,6 +3,8 @@
 #include <server_query.h>
 #include <stdio.h>
 
+client_vars_t client_vars;
+
 client_code_t run_client()
 {
     init_encryption();

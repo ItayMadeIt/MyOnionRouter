@@ -11,18 +11,22 @@
 #undef NULL
 #define NULL 0
 
-static server_config_metadata_t* str_to_metadata(const char* str)
+static bool str_to_metadata(const char* str, server_config_metadata_t* result)
 {
-    server_config_metadata_t* result = (server_config_metadata_t*)calloc(1, sizeof(server_config_metadata_t));
+    if (result == NULL)
+    {
+        return false;
+    }
 
-    if (result == NULL) return NULL;
+    result->port = NULL;
+    result->server = NULL;
 
     char* mutable_str = clone_str(str);
     uint32_t length = strlen(mutable_str);
 
     char* mutable_end = mutable_str + length;
 
-    for (uint32_t i = 0; i < length; i++) 
+    for (uint32_t i = 0; i < length; i++)  
     {
         if (mutable_str[i] == '\n')
         {
@@ -54,10 +58,10 @@ static server_config_metadata_t* str_to_metadata(const char* str)
 
     free(mutable_str);
 
-    return result;
+    return true;
 }
 
-bool fetch_server_config(const char* filepath, server_config_metadata_t** metadata)
+bool fetch_server_config(const char* filepath, server_config_metadata_t* metadata)
 {
     FILE* config_fd = fopen(filepath, "r");
     if (config_fd == NULL)
@@ -74,8 +78,9 @@ bool fetch_server_config(const char* filepath, server_config_metadata_t** metada
         return false;
     }
 
-    *metadata = str_to_metadata(config_str);
+    bool return_value = str_to_metadata(config_str, metadata);
+    
     free(config_str);
 
-    return true;
+    return return_value;
 }

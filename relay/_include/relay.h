@@ -17,7 +17,7 @@ typedef struct relay_vars
     uint32_t register_id;
     bool is_key_init;
     const relay_config_metadata_t* config;
-
+    int sock_fd;
 } relay_vars_t;
 
 extern relay_vars_t relay_vars;

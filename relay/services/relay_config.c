@@ -16,19 +16,22 @@ bool parse_args(const int argc, const char** argv, relay_config_metadata_t** rel
 
     for (int i = 1; i < argc; i++)
     {
-        if ((strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--port") == 0) && i + 1 < argc)
+        if ((strcmp(argv[i], "-p") == 0 || strcmp(argv[i], "--port") == 0) && i + 1 < argc
+            && (*relay_config)->relay_server_cfg.port == NULL && (*relay_config)->relay_server_cfg.server == NULL)
         {
             i++;
 
-            (*relay_config)->relay_port = (char*)clone_str(argv[i]);
+            (*relay_config)->relay_server_cfg.port = (char*)clone_str(argv[i]);
+            (*relay_config)->relay_server_cfg.server = (char*)clone_str("0.0.0.0");
 
             port_found = true;
         }
-        else if ((*relay_config)->server_cfg == NULL)
+        else if ((*relay_config)->dir_server_cfg.server == NULL && (*relay_config)->dir_server_cfg.port == NULL)
         {
-            fetch_server_config(argv[i], &(*relay_config)->server_cfg);
+            fetch_server_config(argv[i], &(*relay_config)->dir_server_cfg);
 
-            server_cfg_found = (*relay_config)->server_cfg != NULL;
+            server_cfg_found = (*relay_config)->dir_server_cfg.server != NULL && 
+                            (*relay_config)->dir_server_cfg.port != NULL;
         }
     }
 
@@ -37,10 +40,6 @@ bool parse_args(const int argc, const char** argv, relay_config_metadata_t** rel
 
 void free_relay_config(relay_config_metadata_t* relay_config)
 {
-    free(relay_config->relay_port);
-    relay_config->relay_port = NULL;
-    
-    free_server_config(relay_config->server_cfg);
-    free(relay_config->server_cfg);
-    relay_config->server_cfg = NULL;
+    free_server_config(&relay_config->relay_server_cfg);
+    free_server_config(&relay_config->dir_server_cfg);
 }

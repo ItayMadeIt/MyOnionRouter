@@ -125,7 +125,7 @@ static void* accept_loop_func(void* _)
 
 server_code_t run_server(const char* config_filepath)
 {
-    server_config_metadata_t* config;
+    server_config_metadata_t config;
     if (fetch_server_config(config_filepath, &config) == false)
     {
         // Invalid path
@@ -140,12 +140,11 @@ server_code_t run_server(const char* config_filepath)
     init_relay_manager();
     init_socket_context();
 
-    printf("Create and bind:\n");
     // Bind
-    server_fd = create_and_bind(config, NULL);
+    server_fd = create_and_bind(&config, NULL);
     if (server_fd == -1)
     {
-        printf("Failed to bind on %s:%s", config->server, config->port);
+        printf("Failed to bind on %s:%s", config.server, config.port);
     }
 
     // Listen
@@ -176,7 +175,7 @@ server_code_t run_server(const char* config_filepath)
     free_id_key(&server_id_key);
     free_encryption();
 
-    free_server_config(config);
+    free_server_config(&config);
 
     return server_success;
 }
