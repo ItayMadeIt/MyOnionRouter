@@ -12,222 +12,12 @@
       "-O2",
       "-c",
       "-o",
-      "../build/utils/string_utils/clone_str.o",
-      "string_utils/clone_str.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/utils",
-    "file": "/home/itaymadeit/MyOnionRouter/utils/string_utils/clone_str.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/utils/string_utils/clone_str.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I.",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/utils/sock_utils/connect_server.o",
-      "sock_utils/connect_server.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/utils",
-    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/connect_server.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/connect_server.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-m64",
-      "-std=c11",
-      "-I.",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/encryptions/dh/dh.o",
-      "dh/dh.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
-    "file": "/home/itaymadeit/MyOnionRouter/encryptions/dh/dh.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/dh/dh.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I.",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/utils/string_utils/str_nclone.o",
-      "string_utils/str_nclone.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/utils",
-    "file": "/home/itaymadeit/MyOnionRouter/utils/string_utils/str_nclone.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/utils/string_utils/str_nclone.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I.",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/utils/server_cfg/free_server_config.o",
-      "server_cfg/free_server_config.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/utils",
-    "file": "/home/itaymadeit/MyOnionRouter/utils/server_cfg/free_server_config.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/utils/server_cfg/free_server_config.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-m64",
-      "-std=c11",
-      "-I.",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/encryptions/aes/aes_key.o",
-      "aes/aes_key.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
-    "file": "/home/itaymadeit/MyOnionRouter/encryptions/aes/aes_key.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/aes/aes_key.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-m64",
-      "-std=c11",
-      "-I.",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/encryptions/aes/aes.o",
-      "aes/aes.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
-    "file": "/home/itaymadeit/MyOnionRouter/encryptions/aes/aes.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/aes/aes.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-m64",
-      "-std=c11",
-      "-I.",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/encryptions/aes/aes_utils.o",
-      "aes/aes_utils.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
-    "file": "/home/itaymadeit/MyOnionRouter/encryptions/aes/aes_utils.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/aes/aes_utils.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I.",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/utils/sock_utils/accept_loop.o",
-      "sock_utils/accept_loop.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/utils",
-    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/accept_loop.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/accept_loop.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I.",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/utils/sock_utils/create_and_bind.o",
-      "sock_utils/create_and_bind.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/utils",
-    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/create_and_bind.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/create_and_bind.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I.",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
       "../build/utils/server_cfg/fetch_server_config.o",
       "server_cfg/fetch_server_config.c"
     ],
     "directory": "/home/itaymadeit/MyOnionRouter/utils",
     "file": "/home/itaymadeit/MyOnionRouter/utils/server_cfg/fetch_server_config.c",
     "output": "/home/itaymadeit/MyOnionRouter/build/utils/server_cfg/fetch_server_config.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-m64",
-      "-std=c11",
-      "-I.",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/encryptions/source/encryptions.o",
-      "source/encryptions.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
-    "file": "/home/itaymadeit/MyOnionRouter/encryptions/source/encryptions.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/source/encryptions.o"
   },
   {
     "arguments": [
@@ -272,19 +62,18 @@
       "/usr/bin/gcc",
       "-Wall",
       "-Wextra",
-      "-std=c11",
       "-m64",
-      "-I_include",
-      "-I../library/include",
+      "-std=c11",
+      "-I.",
       "-O2",
       "-c",
       "-o",
-      "../build/relay/core/main.o",
-      "core/main.c"
+      "../build/encryptions/dh/dh.o",
+      "dh/dh.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/relay",
-    "file": "/home/itaymadeit/MyOnionRouter/relay/core/main.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/relay/core/main.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
+    "file": "/home/itaymadeit/MyOnionRouter/encryptions/dh/dh.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/dh/dh.o"
   },
   {
     "arguments": [
@@ -293,17 +82,54 @@
       "-Wextra",
       "-std=c11",
       "-m64",
-      "-I_include",
-      "-I../library/include",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
       "-O2",
       "-c",
       "-o",
-      "../build/client/core/client.o",
-      "core/client.c"
+      "../build/utils/sock_utils/create_and_bind.o",
+      "sock_utils/create_and_bind.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/client",
-    "file": "/home/itaymadeit/MyOnionRouter/client/core/client.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/client/core/client.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/create_and_bind.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/create_and_bind.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-m64",
+      "-std=c11",
+      "-I.",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/encryptions/aes/aes_utils.o",
+      "aes/aes_utils.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
+    "file": "/home/itaymadeit/MyOnionRouter/encryptions/aes/aes_utils.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/aes/aes_utils.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-m64",
+      "-std=c11",
+      "-I.",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/encryptions/source/encryptions.o",
+      "source/encryptions.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
+    "file": "/home/itaymadeit/MyOnionRouter/encryptions/source/encryptions.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/source/encryptions.o"
   },
   {
     "arguments": [
@@ -312,17 +138,18 @@
       "-Wextra",
       "-std=c11",
       "-m64",
-      "-I_include",
-      "-I../library/include",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
       "-O2",
       "-c",
       "-o",
-      "../build/relay/router/server_register.o",
-      "router/server_register.c"
+      "../build/utils/sock_utils/connect_server.o",
+      "sock_utils/connect_server.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/relay",
-    "file": "/home/itaymadeit/MyOnionRouter/relay/router/server_register.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/relay/router/server_register.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/connect_server.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/connect_server.o"
   },
   {
     "arguments": [
@@ -331,17 +158,36 @@
       "-Wextra",
       "-std=c11",
       "-m64",
-      "-I_include",
-      "-I../library/include",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
       "-O2",
       "-c",
       "-o",
-      "../build/client/services/client_config.o",
-      "services/client_config.c"
+      "../build/utils/sock_utils/connect_server_by_sockaddr.o",
+      "sock_utils/connect_server_by_sockaddr.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/client",
-    "file": "/home/itaymadeit/MyOnionRouter/client/services/client_config.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/client/services/client_config.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/connect_server_by_sockaddr.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/connect_server_by_sockaddr.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-m64",
+      "-std=c11",
+      "-I.",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/encryptions/aes/aes.o",
+      "aes/aes.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
+    "file": "/home/itaymadeit/MyOnionRouter/encryptions/aes/aes.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/aes/aes.o"
   },
   {
     "arguments": [
@@ -350,17 +196,18 @@
       "-Wextra",
       "-std=c11",
       "-m64",
-      "-I_include",
-      "-I../library/include",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
       "-O2",
       "-c",
       "-o",
-      "../build/relay/services/relay_config.o",
-      "services/relay_config.c"
+      "../build/utils/server_cfg/free_server_config.o",
+      "server_cfg/free_server_config.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/relay",
-    "file": "/home/itaymadeit/MyOnionRouter/relay/services/relay_config.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/relay/services/relay_config.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/server_cfg/free_server_config.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/server_cfg/free_server_config.o"
   },
   {
     "arguments": [
@@ -369,17 +216,76 @@
       "-Wextra",
       "-std=c11",
       "-m64",
-      "-I_include",
-      "-I../library/include",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
       "-O2",
       "-c",
       "-o",
-      "../build/relay/net/send_messages.o",
-      "net/send_messages.c"
+      "../build/utils/string_utils/str_nclone.o",
+      "string_utils/str_nclone.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/relay",
-    "file": "/home/itaymadeit/MyOnionRouter/relay/net/send_messages.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/relay/net/send_messages.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/string_utils/str_nclone.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/string_utils/str_nclone.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-m64",
+      "-std=c11",
+      "-I.",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/encryptions/aes/aes_key.o",
+      "aes/aes_key.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/encryptions",
+    "file": "/home/itaymadeit/MyOnionRouter/encryptions/aes/aes_key.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/encryptions/aes/aes_key.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/utils/sock_utils/accept_loop.o",
+      "sock_utils/accept_loop.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/sock_utils/accept_loop.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/sock_utils/accept_loop.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I.",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/utils/string_utils/clone_str.o",
+      "string_utils/clone_str.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/utils",
+    "file": "/home/itaymadeit/MyOnionRouter/utils/string_utils/clone_str.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/utils/string_utils/clone_str.o"
   },
   {
     "arguments": [
@@ -399,25 +305,6 @@
     "directory": "/home/itaymadeit/MyOnionRouter/client",
     "file": "/home/itaymadeit/MyOnionRouter/client/core/main.c",
     "output": "/home/itaymadeit/MyOnionRouter/build/client/core/main.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I_include",
-      "-I../library/include",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/client/net/recv_messages.o",
-      "net/recv_messages.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/client",
-    "file": "/home/itaymadeit/MyOnionRouter/client/net/recv_messages.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/client/net/recv_messages.o"
   },
   {
     "arguments": [
@@ -452,12 +339,50 @@
       "-O2",
       "-c",
       "-o",
-      "../build/relay/net/recv_messages.o",
-      "net/recv_messages.c"
+      "../build/client/services/client_config.o",
+      "services/client_config.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/client",
+    "file": "/home/itaymadeit/MyOnionRouter/client/services/client_config.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/client/services/client_config.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/relay/core/main.o",
+      "core/main.c"
     ],
     "directory": "/home/itaymadeit/MyOnionRouter/relay",
-    "file": "/home/itaymadeit/MyOnionRouter/relay/net/recv_messages.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/relay/net/recv_messages.o"
+    "file": "/home/itaymadeit/MyOnionRouter/relay/core/main.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/relay/core/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/relay/services/relay_config.o",
+      "services/relay_config.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/relay",
+    "file": "/home/itaymadeit/MyOnionRouter/relay/services/relay_config.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/relay/services/relay_config.o"
   },
   {
     "arguments": [
@@ -492,12 +417,130 @@
       "-O2",
       "-c",
       "-o",
-      "../build/relay/core/relay.o",
-      "core/relay.c"
+      "../build/client/core/client.o",
+      "core/client.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/client",
+    "file": "/home/itaymadeit/MyOnionRouter/client/core/client.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/client/core/client.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/client/net/send_messages.o",
+      "net/send_messages.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/client",
+    "file": "/home/itaymadeit/MyOnionRouter/client/net/send_messages.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/client/net/send_messages.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/server/core/server.o",
+      "core/server.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/server",
+    "file": "/home/itaymadeit/MyOnionRouter/server/core/server.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/server/core/server.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/client/net/recv_messages.o",
+      "net/recv_messages.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/client",
+    "file": "/home/itaymadeit/MyOnionRouter/client/net/recv_messages.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/client/net/recv_messages.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/relay/net/send_messages.o",
+      "net/send_messages.c"
     ],
     "directory": "/home/itaymadeit/MyOnionRouter/relay",
-    "file": "/home/itaymadeit/MyOnionRouter/relay/core/relay.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/relay/core/relay.o"
+    "file": "/home/itaymadeit/MyOnionRouter/relay/net/send_messages.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/relay/net/send_messages.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/client/router/server_query.o",
+      "router/server_query.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/client",
+    "file": "/home/itaymadeit/MyOnionRouter/client/router/server_query.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/client/router/server_query.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-pthread",
+      "-D_POSIX_C_SOURCE=200112L",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/server/net/send_messages.o",
+      "net/send_messages.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/server",
+    "file": "/home/itaymadeit/MyOnionRouter/server/net/send_messages.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/server/net/send_messages.o"
   },
   {
     "arguments": [
@@ -534,31 +577,12 @@
       "-O2",
       "-c",
       "-o",
-      "../build/server/net/send_messages.o",
-      "net/send_messages.c"
+      "../build/server/handlers/client_handler.o",
+      "handlers/client_handler.c"
     ],
     "directory": "/home/itaymadeit/MyOnionRouter/server",
-    "file": "/home/itaymadeit/MyOnionRouter/server/net/send_messages.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/server/net/send_messages.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I_include",
-      "-I../library/include",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/client/net/send_messages.o",
-      "net/send_messages.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/client",
-    "file": "/home/itaymadeit/MyOnionRouter/client/net/send_messages.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/client/net/send_messages.o"
+    "file": "/home/itaymadeit/MyOnionRouter/server/handlers/client_handler.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/server/handlers/client_handler.o"
   },
   {
     "arguments": [
@@ -611,38 +635,15 @@
       "-m64",
       "-I_include",
       "-I../library/include",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
       "-O2",
       "-c",
       "-o",
-      "../build/server/handlers/client_handler.o",
-      "handlers/client_handler.c"
+      "../build/relay/net/recv_messages.o",
+      "net/recv_messages.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/server",
-    "file": "/home/itaymadeit/MyOnionRouter/server/handlers/client_handler.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/server/handlers/client_handler.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Wall",
-      "-Wextra",
-      "-std=c11",
-      "-m64",
-      "-I_include",
-      "-I../library/include",
-      "-pthread",
-      "-D_POSIX_C_SOURCE=200112L",
-      "-O2",
-      "-c",
-      "-o",
-      "../build/server/core/server.o",
-      "core/server.c"
-    ],
-    "directory": "/home/itaymadeit/MyOnionRouter/server",
-    "file": "/home/itaymadeit/MyOnionRouter/server/core/server.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/server/core/server.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/relay",
+    "file": "/home/itaymadeit/MyOnionRouter/relay/net/recv_messages.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/relay/net/recv_messages.o"
   },
   {
     "arguments": [
@@ -656,11 +657,30 @@
       "-O2",
       "-c",
       "-o",
-      "../build/client/router/server_query.o",
-      "router/server_query.c"
+      "../build/relay/core/relay.o",
+      "core/relay.c"
     ],
-    "directory": "/home/itaymadeit/MyOnionRouter/client",
-    "file": "/home/itaymadeit/MyOnionRouter/client/router/server_query.c",
-    "output": "/home/itaymadeit/MyOnionRouter/build/client/router/server_query.o"
+    "directory": "/home/itaymadeit/MyOnionRouter/relay",
+    "file": "/home/itaymadeit/MyOnionRouter/relay/core/relay.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/relay/core/relay.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=c11",
+      "-m64",
+      "-I_include",
+      "-I../library/include",
+      "-O2",
+      "-c",
+      "-o",
+      "../build/relay/router/server_register.o",
+      "router/server_register.c"
+    ],
+    "directory": "/home/itaymadeit/MyOnionRouter/relay",
+    "file": "/home/itaymadeit/MyOnionRouter/relay/router/server_register.c",
+    "output": "/home/itaymadeit/MyOnionRouter/build/relay/router/server_register.o"
   }
 ]

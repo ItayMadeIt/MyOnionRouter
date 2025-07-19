@@ -102,12 +102,15 @@ relay_data_t* gen_relay()
         // If out of space, multiply length by 2
         if (items_length <= max_item_index)
         {
+            uint32_t old_length = items_length;
             items_length *= 2;
 
             relay_data_item_t* new_items = 
                 realloc(items, items_length * sizeof(relay_data_item_t));
         
             assert(new_items != NULL);
+    
+            memset(new_items + old_length, 0, (items_length - old_length) * sizeof(relay_data_item_t));
 
             items = new_items;
         }

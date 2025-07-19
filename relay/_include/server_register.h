@@ -5,7 +5,7 @@
 #include <protocol/relay_data_structs.h>
 #include <sys/socket.h>
 
-relay_code_t signup_server(struct sockaddr_storage* sock_addr);
+relay_code_t signup_server();
 relay_code_t signout_server();
 
 

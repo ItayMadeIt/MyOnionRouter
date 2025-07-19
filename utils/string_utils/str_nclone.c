@@ -1,5 +1,9 @@
 #include "string_utils.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 char* str_nclone(const char* str, uint64_t n)
 {
     if (!str) return NULL;

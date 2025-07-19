@@ -3,37 +3,15 @@
 #include <relay.h>
 #include <protocol/server_net_structs.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <utils/sock_utils.h>
 #include <net_messages.h>
+#include <ip_fetch.h>
 
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
-
-static void convert_sock_addr(sock_addr_t* result, const struct sockaddr_storage* storage)
-{
-    if (storage->ss_family == AF_INET) 
-    {
-        const struct sockaddr_in* addr4 = (const struct sockaddr_in*)storage;
-        result->family = AF_INET;
-        result->protocol = IPPROTO_TCP;
-        memcpy(result->addr, &addr4->sin_addr, sizeof(struct in_addr));
-        result->port = addr4->sin_port;
-    }
-    else if (storage->ss_family == AF_INET6) 
-    {
-        const struct sockaddr_in6* addr6 = (const struct sockaddr_in6*)storage;
-        result->family = AF_INET6;
-        result->protocol = IPPROTO_TCP;
-        memcpy(result->addr, &addr6->sin6_addr, sizeof(struct in6_addr));
-        result->port = addr6->sin6_port;
-    }
-    else 
-    {
-        memset(result, 0, sizeof(sock_addr_t));
-    }
-}
 
 static relay_code_t handle_handshake(int sock_fd, msg_server_buffer_t* buffer)
 {
@@ -143,7 +121,7 @@ static relay_code_t handle_signout(int sock_fd, msg_server_buffer_t* buffer, uin
     return relay_success;
 }
 
-relay_code_t signup_server(struct sockaddr_storage* sock_storage)
+relay_code_t signup_server()
 {
     msg_server_buffer_t buffer;
 
@@ -169,8 +147,9 @@ relay_code_t signup_server(struct sockaddr_storage* sock_storage)
     }
 
     sock_addr_t sock_addr;
-    convert_sock_addr(&sock_addr, sock_storage);
-        
+    fetch_ip_sockaddr(&sock_addr);
+    sock_addr.port = htons(atoi(relay_vars.config->relay_server_cfg.port));
+    
     response = handle_signup(sock_fd, &buffer, &sock_addr, &relay_vars.register_id);
     if (response != relay_success)
     {

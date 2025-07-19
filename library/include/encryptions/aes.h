@@ -25,8 +25,8 @@ typedef aes_block128_t aes_keys_t[AES_BLOCK128_KEYS];
 extern uint8_t sbox[BYTE_VALUES];
 extern uint8_t inv_sbox[BYTE_VALUES];
 
-void cpy_block128(aes_block128_t* restrict value, const aes_block128_t* restrict operand);
-void xor_block128(aes_block128_t* restrict value, const aes_block128_t* restrict operand);
+void cpy_block128(aes_block128_t* value, const aes_block128_t* operand);
+void xor_block128(aes_block128_t* value, const aes_block128_t* operand);
 
 void sub_bytes_block128    (aes_block128_t* value);
 void inv_sub_bytes_block128(aes_block128_t* value);

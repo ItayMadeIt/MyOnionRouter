@@ -141,7 +141,7 @@ server_code_t run_server(const char* config_filepath)
     init_socket_context();
 
     // Bind
-    server_fd = create_and_bind(&config, NULL);
+    server_fd = create_and_bind(&config);
     if (server_fd == -1)
     {
         printf("Failed to bind on %s:%s", config.server, config.port);
