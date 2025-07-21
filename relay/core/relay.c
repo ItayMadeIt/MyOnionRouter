@@ -2,85 +2,51 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <pthread.h>
 
+#include <session.h>
+#include <handle_tls.h>
 #include <server_register.h>
 #include <protocol/server_net_structs.h>
 #include <protocol/tor_structs.h>
+#include <net_messages.h>
 #include <utils/sock_utils.h>
 
 #define CONNECTIONS_BACKLOG_AMOUNT 16
 
 relay_vars_t relay_vars;
 
-
 static void client_callback(user_descriptor_t* user)
 {
-    msg_tor_buffer_t buffer_data;
-    key_data_t session_key;
+    // Init session variables
+    relay_session_t session_var = {
+        .last_fd = user->fd,
+        .next_fd = -1,
+    };
+    init_key(&session_var.session_key, &relay_vars.key);
+    init_key(&session_var.tls_last_key, &relay_vars.key);
+    init_key(&session_var.tls_next_key, &relay_vars.key);
+        
+    // Handle TLS (Get common key between last connection and relay)
+    if (handle_tls_recviever(user->fd, &session_var.tls_last_key) == false)
+    {
+        session_var.last_fd = -1;
+        free_session(&session_var);
+        free(user);
+        return;
+    }
 
-    printf("CLIENT CONNECTED\n\n");
+    if (process_session(&session_var) == false)
+    {
+        free(user);
+        return;
+    }
 
+    free_session(&session_var);
     free(user);
-
-    return;
-    
-    /*
-    init_key(&session_key, &server_id_key);
-
-    server_handshake_request_t request;
-    if (recv_handshake_request(user->fd, &buffer_data, &request) == false)
-    {
-        close(user->fd);
-        return;
-    }
-
-    if (send_handshake_response(user->fd, &buffer_data) == false)
-    {
-        close(user->fd);
-        return;
-    }
-
-    server_handshake_client_key_t client_key_msg;
-    if (recv_handshake_client_key(user->fd, &buffer_data, &client_key_msg) == false)
-    {
-        close(user->fd);
-        return;
-    }
-
-    derive_symmetric_key_from_public(&session_key, (uint8_t*)client_key_msg.client_pubkey);
-
-    uint32_t id = user->fd;
-    
-    if (send_handshake_confirmation(user->fd, &buffer_data, &session_key, id) == false)
-    {
-        close(user->fd);
-        return;
-    }
-    
-    add_socket(user->fd, &session_key, NULL);
-    
-    switch (request.user_type)
-    {
-        case prot_user_type_client:
-        {
-            process_client(user->fd, &buffer_data);
-            break;
-        }
-        case prot_user_type_relay:
-        {
-            process_relay(user->fd, &buffer_data);
-            break;
-        }
-        default:
-        {
-            fprintf(stderr, "Unknown user type: %d\n", request.user_type);
-            break;
-        }
-    }*/
-
 }
 
 static void* accept_loop_func(void* _)

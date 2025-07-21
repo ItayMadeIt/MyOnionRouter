@@ -1,8 +1,10 @@
+#include "client.h"
 #include <client_config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <string.h>
 #include <utils/string_utils.h>
 
 #define DEAULT_RELAY_AMOUNT 3
@@ -25,6 +27,12 @@ bool parse_args(const int argc, const char** argv, client_config_metadata_t* cli
             i++;
 
             client_config->relays = atoi(argv[i]);
+
+            if (client_config->relays <= 0 || client_config->relays > MAX_RELAYS)
+            {
+                printf("[Warning] - invalid amount of relays %d.", client_config->relays);
+                continue;
+            }
 
             relays_set = true;
         }

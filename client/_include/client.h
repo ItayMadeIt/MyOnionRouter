@@ -1,10 +1,12 @@
 #ifndef __CLIENT_H__
 #define __CLIENT_H__
 
-#include "protocol/server_net_structs.h"
+#include <protocol/server_net_structs.h>
 #include <encryptions/encryptions.h>
 
-#include <client_config.h>
+#include "client_config.h"
+
+#define MAX_RELAYS 5
 
 typedef enum client_code
 {

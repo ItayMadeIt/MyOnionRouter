@@ -20,6 +20,16 @@ typedef struct relay_vars
     int sock_fd;
 } relay_vars_t;
 
+typedef struct relay_session 
+{
+    key_data_t session_key;
+    key_data_t tls_last_key;
+    key_data_t tls_next_key;
+    int last_fd;
+    int next_fd;
+
+} relay_session_t;
+
 extern relay_vars_t relay_vars;
 
 relay_code_t run_relay(const relay_config_metadata_t* relay_config);

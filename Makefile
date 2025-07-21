@@ -23,7 +23,7 @@ encryptions:
 		INCLUDE_DIR=../$(INCLUDE_DIR) \
 		DEBUG=$(DEBUG)
 
-utils:
+utils: encryptions
 	$(MAKE) -C $(UTILS_DIR) \
 		BUILD_DIR=../$(BUILD_DIR)/utils \
 		LIB_DIR=../$(LIB_DIR) \

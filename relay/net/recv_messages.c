@@ -1,8 +1,42 @@
+#include "protocol/tor_structs.h"
 #include <net_messages.h>
 #include <protocol/server_net_structs.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <relay.h>
+
+bool recv_tls_msg(int sock_fd, tls_key_buffer_t *data) 
+{ 
+    int count = read(sock_fd, data, sizeof(tls_key_buffer_t));
+
+    if (count <= 0)
+    {
+        return false;
+    }
+    
+    return true;
+}
+
+bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key)
+{
+    int count = read(sock_fd, data, sizeof(msg_tor_buffer_t));
+
+    if (count <= 0)
+    {
+        return false;
+    }
+
+    if (tls_key)
+    {
+        symmetric_decrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
+    }
+    if (onion_key)
+    {
+        symmetric_decrypt(onion_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
+    }
+
+    return true;
+}
 
 bool recv_server_msg(int sock_fd, msg_server_buffer_t* buffer)
 {

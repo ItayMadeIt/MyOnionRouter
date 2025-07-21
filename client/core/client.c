@@ -1,10 +1,10 @@
+#include "session.h"
 #include <client.h>
 
 #include <netdb.h>
 #include <unistd.h>
 #include <utils/sock_utils.h>
 #include <server_query.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -57,12 +57,18 @@ client_code_t run_client()
     
     int sock_fd = connect_server_by_sockaddr(&storage, length);
 
-    // Now do tor things 
+    // init session
+    client_session_t session;
+    init_session(&session, sock_fd);
 
-    printf("%d\n\n", sock_fd);
-    close(sock_fd);
+    if (process_session(&session) == false)
+    {
+        free_encryption();
 
-    printf("Relays: %d\n", client_vars.relays.relay_amount);
+        return client_error;
+    }
+
+    free_session(&session);
 
     free_encryption();
 
