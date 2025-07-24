@@ -8,16 +8,25 @@
 
 #define MAX_RELAYS 5
 
+// The result circuit relay list, not the one we get from the server.
+typedef struct circuit_relay_list
+{
+    uint8_t relay_amount;
+    relay_descriptor_t relays[MAX_RELAYS];
+} circuit_relay_list_t;
+
 typedef enum client_code
 {
-    client_success = 0,
-    client_error   = 1,
+    client_success   = 0,
+    client_error     = 1,
+    client_tls_error = 2,
+    client_continue  = ~0,
 } client_code_t;
 
 typedef struct client_vars 
 {
     identity_key_t id_key;   
-    server_relay_list_t relays;
+    circuit_relay_list_t circuit_relays;
     const client_config_metadata_t* config; 
     
     // much more variables, socket to first relay, all relay keys, etc...

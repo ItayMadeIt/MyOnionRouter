@@ -16,7 +16,7 @@ bool recv_tls_msg(int sock_fd, tls_key_buffer_t *data)
     return true;
 }
 
-bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key)
+bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key, uint8_t onion_amount)
 {
     int count = read(sock_fd, data, sizeof(msg_tor_buffer_t));
 
@@ -29,9 +29,13 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
     {
         symmetric_decrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
     }
-    if (onion_key)
+    
+    if (onion_key && onion_amount > 0)
     {
-        symmetric_decrypt(onion_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
+        for (uint8_t i = 0; i < onion_amount; i++)
+        {
+            symmetric_decrypt(&onion_key[i], (uint8_t*)data, sizeof(msg_tor_buffer_t));
+        }        
     }
 
     return true;

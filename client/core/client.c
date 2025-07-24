@@ -1,7 +1,10 @@
 #include "session.h"
 #include <client.h>
 
+#include <handle_tls.h>
+
 #include <netdb.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <utils/sock_utils.h>
 #include <server_query.h>
@@ -49,19 +52,32 @@ client_code_t run_client()
 {
     init_encryption();
 
-    gather_relay_map(&client_vars.relays);
+    printf("Gather relays\n");
+    circuit_relay_list_t relay_list;
+    gather_relay_map(&relay_list, client_vars.config->relays);
 
     struct sockaddr_storage storage;
     socklen_t length;
-    sockaddr_to_unix(&storage, &length, &client_vars.relays.relays[0].sock_addr);
-    
+    sockaddr_to_unix(&storage, &length, &relay_list.relays[0].sock_addr);
     int sock_fd = connect_server_by_sockaddr(&storage, length);
 
     // init session
     client_session_t session;
-    init_session(&session, sock_fd);
+    init_session(&session, sock_fd, &client_vars.circuit_relays);
 
-    if (process_session(&session) == false)
+    printf("process tls\n");
+    // tls handshake
+    if (handle_tls_sender(session.sock_fd, &session.tls_key) == false)
+    {
+        session.sock_fd = -1;
+        free_session(&session);
+        return client_tls_error;
+    }
+
+    printf("process session\n");
+
+    client_code_t result = process_session(&session);
+    if (result != client_success)
     {
         free_encryption();
 

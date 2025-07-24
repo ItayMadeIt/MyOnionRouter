@@ -3,6 +3,7 @@
 
 #include <encryptions/encryptions.h>
 #include <stdint.h>
+#include <protocol/relay_data_structs.h>
 
 #define RELAY_MSG_SIZE 512
 
@@ -39,13 +40,18 @@ typedef struct msg_tor {
 } __attribute__((packed)) msg_tor_t;
 
 
-typedef struct tor_create_data {
-    union 
-    {
-        uint8_t data[RELAY_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t)];
-        uint8_t public_client_key[ASYMMETRIC_KEY_BYTES];
-    };
-} __attribute__((packed)) tor_create_data_t;
+typedef struct msg_tor_create {
+    uint16_t circID;
+    uint8_t cmd; 
+    uint8_t public_client_key[ASYMMETRIC_KEY_BYTES];
+    uint8_t data[RELAY_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t) - ASYMMETRIC_KEY_BYTES];
+} __attribute__((packed)) msg_tor_create_t;
+
+typedef struct msg_tor_created {
+    uint16_t circID;
+    uint8_t cmd; 
+    uint8_t data[RELAY_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t)];
+} __attribute__((packed)) msg_tor_created_t;
 
 
 #define DIGEST_LEN 6
@@ -63,6 +69,39 @@ typedef struct msg_tor_relay {
     
 } __attribute__((packed)) msg_tor_relay_t;
 
+
+typedef struct msg_tor_relay_extend {
+    uint16_t circID;
+    uint8_t relay; // CMD = RELAY  
+    
+    uint16_t streamID;
+    uint8_t digest[DIGEST_LEN];
+    uint16_t length;
+    uint8_t cmd;
+
+    sock_addr_t relay_addr;
+    uint8_t client_public_key[ASYMMETRIC_KEY_BYTES];
+
+    uint8_t data[RELAY_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t)
+                - sizeof(uint16_t) - sizeof(uint8_t)*DIGEST_LEN - sizeof(uint16_t) - sizeof(uint8_t)
+                - sizeof(sock_addr_t) - sizeof(uint8_t) * ASYMMETRIC_KEY_BYTES];
+    
+} __attribute__((packed)) msg_tor_relay_extend_t;
+
+
+typedef struct msg_tor_relay_extended {
+    uint16_t circID;
+    uint8_t relay; // CMD = RELAY  
+    
+    uint16_t streamID;
+    uint8_t digest[DIGEST_LEN];
+    uint16_t length;
+    uint8_t cmd;
+
+    uint8_t data[RELAY_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t)
+                - sizeof(uint16_t) - sizeof(uint8_t)*DIGEST_LEN - sizeof(uint16_t) - sizeof(uint8_t)];
+    
+} __attribute__((packed)) msg_tor_relay_extended_t;
 
 typedef struct tls_key_buffer {
     uint8_t public_key[ASYMMETRIC_KEY_BYTES];

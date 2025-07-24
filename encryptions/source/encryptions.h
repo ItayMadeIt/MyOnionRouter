@@ -53,7 +53,7 @@ void get_public_identity_key(const identity_key_t *key, uint8_t res[DH_KEY_BYTES
 void get_other_public_key(const key_data_t* key, uint8_t res[DH_KEY_BYTES]);
 
 // Sets g^y(param) and g^xy, sets symmetric key for aes using sha256(g^xy)
-void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_KEY_BYTES]);
+void derive_symmetric_key_from_public(key_data_t* key, const uint8_t data[ASYMMETRIC_KEY_BYTES]);
 
 // Uses symmetric key to encrypt data, result is in data as well...
 void symmetric_encrypt(key_data_t* key, uint8_t* data, uint64_t length);

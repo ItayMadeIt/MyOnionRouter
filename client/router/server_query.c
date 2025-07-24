@@ -1,3 +1,4 @@
+#include "protocol/relay_data_structs.h"
 #include <server_query.h>
 
 #include <stdio.h>
@@ -64,7 +65,7 @@ static client_code_t handle_handshake(int sock_fd, msg_server_buffer_t* buffer, 
     return client_success;
 }
 
-static client_code_t handle_fetch_relay_map(int sock_fd, msg_server_buffer_t* buffer, key_data_t* server_key, server_relay_list_t* list)
+static client_code_t fetch_relay_map(int sock_fd, msg_server_buffer_t* buffer, key_data_t* server_key, server_relay_list_t* list)
 {
     if (send_server_relay_map_req(sock_fd, buffer, server_key) == false)
     {
@@ -98,7 +99,7 @@ static client_code_t handle_exit(int sock_fd, msg_server_buffer_t* buffer, key_d
     return client_success;
 }
 
-client_code_t gather_relay_map(server_relay_list_t* relay_list)
+client_code_t gather_relay_map(circuit_relay_list_t* relay_list, uint8_t relay_amount)
 {
     msg_server_buffer_t buffer;
 
@@ -119,12 +120,22 @@ client_code_t gather_relay_map(server_relay_list_t* relay_list)
         return response;
     }
 
-    response = handle_fetch_relay_map(sock_fd, &buffer, &server_key, relay_list);
+    server_relay_list_t server_list;
+    response = fetch_relay_map(sock_fd, &buffer, &server_key, &server_list);
     if (response != client_success)
     {
         free_key(&server_key);
         return response;
     }
+
+    if (server_list.relay_amount < relay_amount)
+    {   
+        free_key(&server_key);
+        return client_error;
+    }
+
+    relay_list->relay_amount = relay_amount;
+    memcpy(relay_list->relays, &server_list.relays, relay_amount * sizeof(relay_descriptor_t));
 
     response = handle_exit(sock_fd, &buffer, &server_key);
 

@@ -86,7 +86,7 @@ void get_other_public_key(const key_data_t* key, uint8_t res[DH_KEY_BYTES])
 }
 
 // Sets g^y and g^xy, sets symmetric key for aes using sha256(g^xy)
-void derive_symmetric_key_from_public(key_data_t* key, uint8_t data[ASYMMETRIC_KEY_BYTES])
+void derive_symmetric_key_from_public(key_data_t* key, const uint8_t data[ASYMMETRIC_KEY_BYTES])
 {
     // Set g^y and compute g^xy in session
     set_dh_key_other_public(&key->session, data);

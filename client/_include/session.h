@@ -12,12 +12,14 @@ typedef struct client_session {
 
     int sock_fd;
 
+    const circuit_relay_list_t* relays;
+    uint8_t cur_relays; 
     const client_config_metadata_t* config;
 
 } client_session_t;
 
-void init_session(client_session_t* session, int sock_fd);
-bool process_session(client_session_t* session);
+void init_session(client_session_t* session, int sock_fd, const circuit_relay_list_t* relay_list);
+client_code_t process_session(client_session_t* session);
 void free_session(client_session_t* session);
 
 #endif // __SESSION_H__

@@ -1,5 +1,7 @@
 #include <relay.h>
 
+#include <utils/debug.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,30 +24,26 @@ relay_vars_t relay_vars;
 static void client_callback(user_descriptor_t* user)
 {
     // Init session variables
-    relay_session_t session_var = {
-        .last_fd = user->fd,
-        .next_fd = -1,
-    };
-    init_key(&session_var.session_key, &relay_vars.key);
-    init_key(&session_var.tls_last_key, &relay_vars.key);
-    init_key(&session_var.tls_next_key, &relay_vars.key);
-        
+    relay_session_t session;
+    init_session(&session, user->fd);
+    
     // Handle TLS (Get common key between last connection and relay)
-    if (handle_tls_recviever(user->fd, &session_var.tls_last_key) == false)
+    if (handle_tls_recviever(user->fd, &session.tls_last_key) == false)
     {
-        session_var.last_fd = -1;
-        free_session(&session_var);
+        session.last_fd = -1;
+        free_session(&session);
         free(user);
         return;
     }
 
-    if (process_session(&session_var) == false)
+    relay_code_t code = process_session(&session);
+    if (code != relay_success)
     {
         free(user);
         return;
-    }
+    } 
 
-    free_session(&session_var);
+    free_session(&session);
     free(user);
 }
 

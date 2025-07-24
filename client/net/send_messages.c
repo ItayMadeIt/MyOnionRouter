@@ -12,12 +12,16 @@ bool send_tls_msg(int sock_fd, tls_key_buffer_t *data)
     return (count == sizeof(tls_key_buffer_t));
 }
 
-bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key) 
+bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key, uint8_t onion_amount) 
 {
-    if (onion_key)
-    { 
-        symmetric_encrypt(onion_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
+    if (onion_key && onion_amount > 0)
+    {
+        for (uint8_t i = onion_amount; i-- > 0;)
+        {
+            symmetric_encrypt(&onion_key[i], (uint8_t*)data, sizeof(msg_tor_buffer_t));
+        }
     }
+
     if (tls_key)
     {
         symmetric_encrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
