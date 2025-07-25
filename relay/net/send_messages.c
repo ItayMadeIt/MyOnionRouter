@@ -1,6 +1,8 @@
 #include "protocol/tor_structs.h"
 #include <net_messages.h>
 
+#include <utils/debug.h>
+
 #include <protocol/server_net_structs.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -14,14 +16,29 @@ bool send_tls_msg(int sock_fd, tls_key_buffer_t *data)
     return (count == sizeof(tls_key_buffer_t));
 }
 
-bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key) 
+bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key, bool to_client) 
 {
-    if (onion_key)
+#ifdef DEBUG
+    msg_tor_t* tor = (msg_tor_t* )data;
+    printf("Sending CMD: %d\n", tor->cmd); 
+#endif
+
+    // no need to encrypt: uint16_t circID, uint8_t cmd
+    if (onion_key && to_client)
     { 
-        symmetric_encrypt(onion_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
+        printf("Encrypt "); print_block(&onion_key->symmetric_key);
+
+        symmetric_encrypt(
+            onion_key, 
+            (uint8_t*)data + sizeof(uint8_t) + sizeof(uint16_t), 
+            sizeof(msg_tor_buffer_t) - sizeof(uint8_t) - sizeof(uint16_t)
+        );
     }
+
     if (tls_key)
     {
+        printf("Encrypt tls "); print_block(&tls_key->symmetric_key);
+
         symmetric_encrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
     }
 

@@ -9,8 +9,8 @@
 bool recv_tls_msg(int sock_fd, tls_key_buffer_t* data);
 bool send_tls_msg(int sock_fd, tls_key_buffer_t* data);
 
-bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key);
-bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key);
+bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key, bool from_client);
+bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key, bool to_client);
 
 bool recv_server_msg(int sock_fd, msg_server_buffer_t* buffer);
 bool recv_enc_server_msg(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key);

@@ -8,11 +8,11 @@
 
 #include <gmp.h>
 
-void print_block(aes_block128_t *block)
+void print_block(const aes_block128_t *block)
 {
     printf("%08X %08X %08X %08X\n", block->columns[0], block->columns[1], block->columns[2], block->columns[3]);
 }
-void print_asymmertic(uint8_t data[ASYMMETRIC_KEY_BYTES])
+void print_asymmertic(const uint8_t data[ASYMMETRIC_KEY_BYTES])
 {
     for (uint32_t i = 0; i < ASYMMETRIC_KEY_BYTES/4; i++)
     {

@@ -8,6 +8,8 @@ typedef enum relay_code
 {
     relay_success = 0,
     relay_error   = 1,
+    relay_unexpected_msg = 2,
+    relay_conntinue = ~0,
 } relay_code_t;
 
 typedef struct relay_vars
@@ -22,7 +24,7 @@ typedef struct relay_vars
 
 typedef struct relay_session 
 {
-    key_data_t session_key;
+    key_data_t onion_key;
     key_data_t tls_last_key;
     key_data_t tls_next_key;
     int last_fd;

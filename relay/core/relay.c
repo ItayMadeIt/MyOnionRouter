@@ -25,25 +25,26 @@ static void client_callback(user_descriptor_t* user)
 {
     // Init session variables
     relay_session_t session;
-    init_session(&session, user->fd);
+    init_relay_session(&session, user->fd);
     
     // Handle TLS (Get common key between last connection and relay)
     if (handle_tls_recviever(user->fd, &session.tls_last_key) == false)
     {
         session.last_fd = -1;
-        free_session(&session);
+        free_relay_session(&session);
         free(user);
+        printf("Session failed tls\n");
         return;
     }
 
-    relay_code_t code = process_session(&session);
+    relay_code_t code = process_relay_session(&session);
     if (code != relay_success)
     {
         free(user);
         return;
     } 
 
-    free_session(&session);
+    free_relay_session(&session);
     free(user);
 }
 

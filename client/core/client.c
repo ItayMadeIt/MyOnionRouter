@@ -4,7 +4,6 @@
 #include <handle_tls.h>
 
 #include <netdb.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <utils/sock_utils.h>
 #include <server_query.h>
@@ -38,7 +37,6 @@ static void sockaddr_to_unix(struct sockaddr_storage* storage, socklen_t* storag
 
         *storage_length = sizeof(struct sockaddr_in6);
     }
-
     else 
     {
         // Unsupported family
@@ -52,7 +50,6 @@ client_code_t run_client()
 {
     init_encryption();
 
-    printf("Gather relays\n");
     circuit_relay_list_t relay_list;
     gather_relay_map(&relay_list, client_vars.config->relays);
 
@@ -63,9 +60,9 @@ client_code_t run_client()
 
     // init session
     client_session_t session;
-    init_session(&session, sock_fd, &client_vars.circuit_relays);
+    session.relays = &relay_list;
+    init_session(&session, sock_fd, &relay_list);
 
-    printf("process tls\n");
     // tls handshake
     if (handle_tls_sender(session.sock_fd, &session.tls_key) == false)
     {
@@ -74,9 +71,7 @@ client_code_t run_client()
         return client_tls_error;
     }
 
-    printf("process session\n");
-
-    client_code_t result = process_session(&session);
+    client_code_t result = process_client_session(&session);
     if (result != client_success)
     {
         free_encryption();
