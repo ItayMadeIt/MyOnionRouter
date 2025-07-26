@@ -25,9 +25,9 @@ bool send_server_handshake_key(int sock_fd, msg_server_buffer_t* buffer, uint8_t
 bool recv_server_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, server_handshake_confirmation_t* confirmation);
 
 bool send_server_signup_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, sock_addr_t* sock_addr);
-bool recv_server_signup_res(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint32_t* id);
+bool recv_server_signup_res(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint16_t* id);
 
-bool send_server_signout_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint32_t id);
+bool send_server_signout_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint16_t id);
 bool recv_server_signout_res(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key);
 
 bool send_server_exit_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key);

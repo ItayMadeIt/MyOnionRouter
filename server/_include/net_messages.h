@@ -16,9 +16,9 @@ bool send_handshake_response(int sock_fd, msg_server_buffer_t* buffer);
 
 bool recv_handshake_client_key(int sock_fd, msg_server_buffer_t* buffer, server_handshake_client_key_t* request);
 // (confirmation is encrypted)
-bool send_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint32_t id);
+bool send_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint16_t id);
 
-bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type, uint32_t id);
+bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type, uint16_t id);
 bool send_enc_relay_signout_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type);
 bool send_enc_relay_exit_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type);
 

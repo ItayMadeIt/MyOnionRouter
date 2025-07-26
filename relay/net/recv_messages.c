@@ -39,6 +39,7 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
     if (onion_key && from_client)
     {
         printf("Decrypt "); print_block(&onion_key->symmetric_key);
+
         symmetric_decrypt(
             onion_key, 
             (uint8_t*)data + sizeof(uint8_t) + sizeof(uint16_t), 
@@ -104,7 +105,7 @@ bool recv_server_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer
     return true;
 }
 
-bool recv_server_signup_res(int sock_fd, msg_server_buffer_t *buffer, key_data_t *key, uint32_t *id)
+bool recv_server_signup_res(int sock_fd, msg_server_buffer_t *buffer, key_data_t *key, uint16_t *id)
 {
     if (recv_enc_server_msg(sock_fd, buffer, key) == false)
     {

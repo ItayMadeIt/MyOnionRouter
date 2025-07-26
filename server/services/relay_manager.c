@@ -12,13 +12,13 @@
 
 static bool initialized = false;
 
-static uint32_t items_length;
+static uint16_t items_length;
 static relay_data_item_t* items;
-static uint32_t max_item_index;
+static uint16_t max_item_index;
 
-static uint32_t stack_length;
-static uint32_t* removed_id_stack; 
-static uint32_t max_stack_index;
+static uint16_t stack_length;
+static uint16_t* removed_id_stack; 
+static uint16_t max_stack_index;
 
 static pthread_mutex_t relay_manager_thread = PTHREAD_MUTEX_INITIALIZER;
 
@@ -38,13 +38,13 @@ void init_relay_manager()
     items = calloc(items_length, sizeof(relay_data_item_t));
     max_item_index = 0;
 
-    for (uint32_t i = 0; i < items_length; i++)
+    for (uint16_t i = 0; i < items_length; i++)
     {
         items[i].exists = false;
     }
 
     stack_length = RELAY_STACK_MIN_LENGTH;
-    removed_id_stack = calloc(stack_length, sizeof(uint32_t));
+    removed_id_stack = calloc(stack_length, sizeof(uint16_t));
     max_stack_index = 0;
 
     pthread_mutex_unlock(&relay_manager_thread);
@@ -77,7 +77,7 @@ void free_relay_manager()
     pthread_mutex_unlock(&relay_manager_thread);
 }
 
-relay_data_t* get_relay(uint32_t id)
+relay_data_t* get_relay(uint16_t id)
 {
     pthread_mutex_lock(&relay_manager_thread);
 
@@ -102,7 +102,7 @@ relay_data_t* gen_relay()
         // If out of space, multiply length by 2
         if (items_length <= max_item_index)
         {
-            uint32_t old_length = items_length;
+            uint16_t old_length = items_length;
             items_length *= 2;
 
             relay_data_item_t* new_items = 
@@ -131,7 +131,7 @@ relay_data_t* gen_relay()
     }
 
     max_stack_index--;
-    uint32_t removed_id = removed_id_stack[max_stack_index];
+    uint16_t removed_id = removed_id_stack[max_stack_index];
 
     // Assigns id to the index
     memset(&items[removed_id], 0, sizeof(items[removed_id]));
@@ -147,7 +147,7 @@ relay_data_t* gen_relay()
     return relay_data;
 }
 
-bool remove_relay(uint32_t id)
+bool remove_relay(uint16_t id)
 {
     pthread_mutex_lock(&relay_manager_thread);
 
@@ -164,8 +164,8 @@ bool remove_relay(uint32_t id)
     {
         stack_length *= 2;
 
-        uint32_t* new_removed_id_stack = 
-            (uint32_t*)realloc(removed_id_stack, stack_length * sizeof(uint32_t));
+        uint16_t* new_removed_id_stack = 
+            (uint16_t*)realloc(removed_id_stack, stack_length * sizeof(uint16_t));
     
         assert(new_removed_id_stack != NULL);
 
@@ -182,13 +182,13 @@ bool remove_relay(uint32_t id)
     return true;
 }
 
-uint32_t get_relay_batch(relay_descriptor_t* out, uint32_t* start, uint32_t max) 
+uint16_t get_relay_batch(relay_descriptor_t* out, uint16_t* start, uint16_t max) 
 {
     pthread_mutex_lock(&relay_manager_thread);
 
-    uint32_t found = 0;
-    uint32_t i = *start % items_length;
-    uint32_t count = 0;
+    uint16_t found = 0;
+    uint16_t i = *start % items_length;
+    uint16_t count = 0;
 
 
     while (found < max && count < items_length) 

@@ -35,7 +35,7 @@ typedef struct relay_data
     relay_descriptor_t descriptor;
 
     // Unique id for each relay
-    uint32_t relay_id;
+    uint16_t relay_id;
 
 } relay_data_t;
 

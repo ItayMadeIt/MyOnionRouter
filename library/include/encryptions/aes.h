@@ -15,7 +15,7 @@
 typedef struct __attribute__((aligned(16))) {
     union {
         uint8_t bytes[AES_BLOCK128_SIDE][AES_BLOCK128_SIDE];
-        uint32_t columns[4];
+        uint16_t columns[4];
     };
 } aes_block128_t;
 

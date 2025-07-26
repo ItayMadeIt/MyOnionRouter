@@ -25,7 +25,7 @@ static bool handle_signup(int sock_fd, relay_data_t** relay_data, key_data_t* ke
     get_other_public_key(key, (*relay_data)->descriptor.public_key);
     memcpy(&(*relay_data)->descriptor.sock_addr, &request.relay_addr, sizeof(sock_addr_t));
 
-    uint32_t relay_id = (*relay_data)->relay_id;
+    uint16_t relay_id = (*relay_data)->relay_id;
 
     return send_enc_relay_signup_response(sock_fd, key, buffer, server_response_success, relay_id);
 }

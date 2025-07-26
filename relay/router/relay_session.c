@@ -21,6 +21,8 @@ void init_relay_session(relay_session_t* session, int sock_fd)
 }
 void free_relay_session(relay_session_t *session)
 {
+    printf("Free session\n");
+
     free_key(&session->onion_key);
     free_key(&session->tls_last_key);
     free_key(&session->tls_next_key);
@@ -86,7 +88,7 @@ relay_code_t process_relay_session(relay_session_t* session)
     {
         printf("Failed to recv first tor buffer\n");
         free_relay_session(session);
-        return return_value;
+        return relay_error;
     }
 
     msg_tor_relay_t* msg = (msg_tor_relay_t*)&buffer;

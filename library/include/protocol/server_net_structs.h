@@ -12,7 +12,7 @@
 
 #define SERVER_RELAYS_MAP_AMOUNT ((SERVER_MSG_SIZE - sizeof(uint16_t)*2)/ sizeof(relay_descriptor_t))
 
-#define INVALID_RELAY_ID (uint32_t)(~0)
+#define INVALID_RELAY_ID (uint16_t)(~0)
 
 typedef struct msg_server_buffer {
     uint8_t data[SERVER_MSG_SIZE];
@@ -64,7 +64,7 @@ typedef struct server_handshake_confirmation
     uint8_t magic[SERVER_HANDSHAKE_V1_MAGIC_LEN];
     
     // Doesn't mean anything, for now sock_fd
-    uint32_t assigned_id;
+    uint16_t assigned_id;
 
     // Time it was sent
     uint64_t timestamp; 
@@ -102,7 +102,7 @@ typedef struct server_relay_request_signout
 {
     server_relay_request_t base; // relay signout
 
-    uint32_t assigned_id; // relay id (from handshake confirmation)
+    uint16_t assigned_id; // relay id (from handshake confirmation)
 
 } __attribute__((packed)) server_relay_request_signout_t;
 
@@ -117,7 +117,7 @@ typedef struct server_relay_response_base
 {
     uint64_t timestamp;
     
-    uint32_t response_code;
+    uint16_t response_code;
 
     server_relay_request_t request;
 
@@ -171,7 +171,7 @@ typedef struct server_client_response_base
 {
     uint64_t timestamp;
     
-    uint32_t response_code;
+    uint16_t response_code;
 
     server_client_request_t request;
 

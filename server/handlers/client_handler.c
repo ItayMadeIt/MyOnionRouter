@@ -12,7 +12,7 @@
 
 typedef struct client_data
 {
-    uint32_t relay_start;
+    uint16_t relay_start;
 } client_data_t;
 
 static bool handle_get_relay_map(int sock_fd, client_data_t* client_data, key_data_t* key, msg_server_buffer_t* buffer)

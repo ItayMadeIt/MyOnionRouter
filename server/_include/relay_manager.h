@@ -20,15 +20,15 @@ void init_relay_manager();
 void free_relay_manager();
 
 // Relay data by id, if doesn't exist it's NULL
-relay_data_t* get_relay(uint32_t id);
+relay_data_t* get_relay(uint16_t id);
 
 // Creates a relay and assigns an id
 relay_data_t* gen_relay();
 
 // Removes relay
-bool remove_relay(uint32_t id);
+bool remove_relay(uint16_t id);
 
 // Gets a `max` amount of relays
-uint32_t get_relay_batch(relay_descriptor_t* out, uint32_t* start, uint32_t max);
+uint16_t get_relay_batch(relay_descriptor_t* out, uint16_t* start, uint16_t max);
 
 #endif // __RELAY_MANAGER_H__

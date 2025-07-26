@@ -1,7 +1,5 @@
 #include <aes/aes.h>
-#include <stdio.h>
-
-#define BYTE_VALUES 0x100
+#include <string.h>
 
 uint8_t sbox[BYTE_VALUES] = {
 //     0     1     2     3     4     5     6     7     8     9     A     B     C     D     E     F

@@ -106,8 +106,6 @@ relay_code_t process_middle_relay_session(relay_session_t* session, msg_tor_buff
         return response;
     }
 
-    printf("Sent extended relay");
-
     bool from_client = true;
 
     // Sample recv loop (recv from client then from internet in a loop)

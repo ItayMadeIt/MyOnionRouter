@@ -40,11 +40,14 @@ static void client_callback(user_descriptor_t* user)
     relay_code_t code = process_relay_session(&session);
     if (code != relay_success)
     {
+        printf("Free user\n");
         free(user);
         return;
     } 
 
+    printf("Free session\n");
     free_relay_session(&session);
+    printf("Free user\n");
     free(user);
 }
 

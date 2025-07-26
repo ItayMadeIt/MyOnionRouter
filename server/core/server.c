@@ -80,7 +80,7 @@ static void client_callback(user_descriptor_t* user)
 
     derive_symmetric_key_from_public(&session_key, (uint8_t*)client_key_msg.client_pubkey);
 
-    uint32_t id = user->fd;
+    uint16_t id = user->fd;
     
     if (send_handshake_confirmation(user->fd, &buffer_data, &session_key, id) == false)
     {

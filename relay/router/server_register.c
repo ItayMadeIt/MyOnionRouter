@@ -87,7 +87,7 @@ static relay_code_t handle_exit(int sock_fd, msg_server_buffer_t* buffer)
     return relay_success;
 }
 
-static relay_code_t handle_signup(int sock_fd, msg_server_buffer_t* buffer, sock_addr_t* sock_addr, uint32_t* id)
+static relay_code_t handle_signup(int sock_fd, msg_server_buffer_t* buffer, sock_addr_t* sock_addr, uint16_t* id)
 {
     if (send_server_signup_req(sock_fd, buffer, &relay_vars.server_key, sock_addr) == false)
     {
@@ -104,7 +104,7 @@ static relay_code_t handle_signup(int sock_fd, msg_server_buffer_t* buffer, sock
     return relay_success;
 }
 
-static relay_code_t handle_signout(int sock_fd, msg_server_buffer_t* buffer, uint32_t id)
+static relay_code_t handle_signout(int sock_fd, msg_server_buffer_t* buffer, uint16_t id)
 {
     if (send_server_signout_req(sock_fd, buffer, &relay_vars.server_key, id) == false)
     {

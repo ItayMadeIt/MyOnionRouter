@@ -53,7 +53,7 @@ bool send_handshake_response(int sock_fd, msg_server_buffer_t* buffer)
 }
 
 
-bool send_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* session_key, uint32_t id) 
+bool send_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_data_t* session_key, uint16_t id) 
 {
     server_handshake_confirmation_t confirm;
 
@@ -65,7 +65,7 @@ bool send_handshake_confirmation(int sock_fd, msg_server_buffer_t* buffer, key_d
     return send_enc_server_msg(sock_fd, buffer, &confirm, sizeof(confirm), session_key);
 }
 
-bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type, uint32_t id)
+bool send_enc_relay_signup_response(int sock_fd, key_data_t* key, msg_server_buffer_t *buffer, server_responses_t response_type, uint16_t id)
 {
     server_relay_response_signup_t response = {
         .base.request.command=RELAY_COMMAND_SIGNUP,

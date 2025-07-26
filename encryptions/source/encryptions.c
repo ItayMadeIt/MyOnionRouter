@@ -14,7 +14,7 @@ void print_block(const aes_block128_t *block)
 }
 void print_asymmertic(const uint8_t data[ASYMMETRIC_KEY_BYTES])
 {
-    for (uint32_t i = 0; i < ASYMMETRIC_KEY_BYTES/4; i++)
+    for (uint16_t i = 0; i < ASYMMETRIC_KEY_BYTES/4; i++)
     {
         printf("%08X ", data[i * 4]);
     }

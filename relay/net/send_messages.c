@@ -112,7 +112,7 @@ bool send_server_signup_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t
     return send_enc_server_msg(sock_fd, buffer, &data, sizeof(server_relay_request_signup_t), key);
 }
 
-bool send_server_signout_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint32_t id)
+bool send_server_signout_req(int sock_fd, msg_server_buffer_t* buffer, key_data_t* key, uint16_t id)
 {
     server_relay_request_signout_t data ={
         .base.command = RELAY_COMMAND_SIGNOUT,

@@ -22,11 +22,11 @@ static bool str_to_metadata(const char* str, server_config_metadata_t* result)
     result->server = NULL;
 
     char* mutable_str = clone_str(str);
-    uint32_t length = strlen(mutable_str);
+    uint16_t length = strlen(mutable_str);
 
     char* mutable_end = mutable_str + length;
 
-    for (uint32_t i = 0; i < length; i++)  
+    for (uint16_t i = 0; i < length; i++)  
     {
         if (mutable_str[i] == '\n')
         {
