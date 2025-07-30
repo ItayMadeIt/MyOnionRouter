@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <string.h>
 #include <utils/string_utils.h>
 
 bool parse_args(const int argc, const char** argv, relay_config_metadata_t** relay_config)

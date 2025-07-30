@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -m64 -I_include -I$(INCLUDE_DIR) 
+CFLAGS = -Wall -Wextra -std=c11 -m64 -I_include -I$(INCLUDE_DIR) -D_POSIX_C_SOURCE=200112L
+LDFLAGS = -flto -pthread
 SRC_DIRS = core services router net
 
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
@@ -23,7 +24,7 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	@echo "Compiling binary $< to $@"
 	@mkdir -p $(dir $@)
-	$(CC) $(OBJ) -o $@ $(LIBS)
+	$(CC) $(LDFLAGS) $(OBJ) -o $@ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c
 	@echo "Compiling $< to $@"

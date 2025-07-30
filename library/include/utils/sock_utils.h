@@ -29,4 +29,7 @@ int connect_server(const server_config_metadata_t* config);
 //  returns the new sock_fd
 int connect_server_by_sockaddr(struct sockaddr_storage* addr, socklen_t addr_len);
 
+// Makes a socket NON-BLOCKING, ensuring it works
+void set_socket_nonblock(int sock_fd);
+
 #endif // __SOCK_UTILS_H__

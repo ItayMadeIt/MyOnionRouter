@@ -18,8 +18,33 @@
 #include <utils/sock_utils.h>
 
 #define CONNECTIONS_BACKLOG_AMOUNT 16
+#define INPUT_SIZE 128
 
 relay_vars_t relay_vars;
+
+
+static void run_relay_cmd()
+{
+    bool running = true;
+
+    while (running)
+    {
+        char input[INPUT_SIZE];
+        if (fgets(input, sizeof(input), stdin) != input)
+        {
+            fprintf(stderr, "Invalid input");
+            break;
+        }
+        input[strcspn(input, "\n")] = '\0';
+        printf("`%s`\n", input);
+    
+        if (strcmp(input, "exit") == 0)
+        {
+            running = false;
+        }
+    }
+}
+
 
 static void client_callback(user_descriptor_t* user)
 {
@@ -94,9 +119,7 @@ relay_code_t run_relay(const relay_config_metadata_t* relay_config)
     }
     pthread_detach(conn_thread_err);
 
-    sleep(60);
-    // Each client get it's own TOR socket, seperate logic entirely
-
+    run_relay_cmd();
 
     result = signout_server();
     if (result != relay_success)

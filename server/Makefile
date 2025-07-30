@@ -1,5 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -m64 -I_include -I$(INCLUDE_DIR) -pthread -D_POSIX_C_SOURCE=200112L 
+CFLAGS = -Wall -Wextra -std=c11 -m64 -I_include -I$(INCLUDE_DIR) -D_POSIX_C_SOURCE=200112L
+LDFLAGS = -flto -pthread
 SRC_DIRS = services core net handlers 
 
 SRC = $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
@@ -22,9 +23,9 @@ endif
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	@echo "Compiling binary $< to $@"
+	@echo "Linking binary $@"
 	@mkdir -p $(dir $@)
-	$(CC) $(OBJ) -o $@ $(LIBS)
+	$(CC) $(LDFLAGS) $(OBJ) -o $@ $(LIBS)
 
 $(BUILD_DIR)/%.o: %.c
 	@echo "Compiling $< to $@"

@@ -36,7 +36,7 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
     
     if (onion_key && onion_amount > 0)
     {
-        // no need to encrypt/decrypt: uint16_t circID, uint8_t cmd
+        // no need to encrypt/decrypt: uint16_t circ_id, uint8_t cmd
         for (uint8_t i = 0; i < onion_amount; i++)
         {
             printf("Decrypt onion %d ", i);print_block(&onion_key[i].symmetric_key);

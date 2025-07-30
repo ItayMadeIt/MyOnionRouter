@@ -1,6 +1,8 @@
 #include "sock_utils.h"
 #include <stdio.h>
+#include <sys/socket.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 int connect_server_by_sockaddr(struct sockaddr_storage* addr, socklen_t addr_len)
 {

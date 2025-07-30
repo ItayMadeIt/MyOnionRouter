@@ -17,15 +17,9 @@ bool send_tls_msg(int sock_fd, tls_key_buffer_t *data)
 
 bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, key_data_t* onion_key, uint8_t onion_amount) 
 {
-#ifdef DEBUG
-    msg_tor_t* tor = (msg_tor_t* )data;
-    uint8_t cmd = tor->cmd;
-    printf("Sending CMD: %d\n", tor->cmd); 
-#endif
-
     if (onion_key && onion_amount > 0)
     {
-        // no need to encrypt/decrypt: uint16_t circID, uint8_t cmd
+        // no need to encrypt/decrypt: uint16_t circ_id, uint8_t cmd
         for (uint8_t i = onion_amount; i-- > 0;)
         {
             printf("Encrypt "); print_block(&onion_key[i].symmetric_key);

@@ -28,11 +28,13 @@ void free_relay_session(relay_session_t *session)
     if (session->last_fd >= 0)
     {
         close(session->last_fd);
+        session->last_fd = -1;
     }
     
     if (session->next_fd >= 0)
     {
         close(session->next_fd);
+        session->next_fd = -1;
     }
 }
 
@@ -80,7 +82,6 @@ relay_code_t process_relay_session(relay_session_t* session)
         free_relay_session(session);
         return return_value;
     }
-    printf("Create message accepted\n");
 
     if (recv_tor_buffer(session->last_fd, &buffer, &session->tls_last_key, &session->onion_key, true) == false)
     {
@@ -100,12 +101,10 @@ relay_code_t process_relay_session(relay_session_t* session)
     printf("msg relay cmd: %d\n", msg->cmd);
     if (msg->cmd == RELAY_EXTEND)
     {
-        printf("Process middle relay\n");
         return process_middle_relay_session(session, &buffer);
     }
     else
     {
-        printf("Process last extend\n");
         return process_end_relay_session(session, &buffer);
     }
 }

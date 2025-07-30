@@ -1,4 +1,5 @@
-#include "stream_data_manager.h"
+#include "stream_buffers.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

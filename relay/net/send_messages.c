@@ -23,7 +23,7 @@ bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
     printf("Sending CMD: %d\n", tor->cmd); 
 #endif
 
-    // no need to encrypt: uint16_t circID, uint8_t cmd
+    // no need to encrypt: uint16_t circ_id, uint8_t cmd
     if (onion_key && to_client)
     { 
         printf("Encrypt "); print_block(&onion_key->symmetric_key);
