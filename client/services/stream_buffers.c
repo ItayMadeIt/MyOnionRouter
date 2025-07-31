@@ -40,7 +40,8 @@ static void grow_buffer(circular_buffer_t* buffer)
 
     if (buffer->head < buffer->tail)
     {
-        memcpy(buffer->buffer + old_capacity, buffer->buffer + buffer->tail, old_capacity - buffer->tail);
+        uint32_t tail_to_end_length = old_capacity - buffer->tail;
+        memcpy(buffer->buffer + buffer->capacity - tail_to_end_length, buffer->buffer + buffer->tail, tail_to_end_length);
 
         buffer->tail += old_capacity;
     }

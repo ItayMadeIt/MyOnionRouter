@@ -284,6 +284,8 @@ static bool process_internet_event(stream_data_t* stream_data, relay_session_t* 
     ssize_t size = read_buffer(stream_data->sock_fd, tor_msg->data, RELAY_MSG_SIZE);
     if (size <= 0)
     {
+        printf("Failed to read buffer from stream: %u\n", stream_data->stream_id);
+
         struct epoll_event ev;
         ev.events = EPOLLIN;
         epoll_ctl(epoll_fd, EPOLL_CTL_DEL,stream_data->sock_fd, &ev);
@@ -323,6 +325,8 @@ static bool process_internet_event(stream_data_t* stream_data, relay_session_t* 
 
         return false;
     }
+    
+    printf("Sent DATA len(%lu)\n", size);
 
     return true;
 } 
@@ -350,7 +354,9 @@ static bool handle_event(relay_session_t* session, struct epoll_event* event, so
     else
     {
         printf("Handle internet event.\n");
+
         socket_hashmap_entry_t* entry = socket_hashmap_find(hashmap, event->data.u32);
+        
         if (entry == NULL)
         {
             close(session->last_fd);

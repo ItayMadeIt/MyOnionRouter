@@ -23,6 +23,9 @@
 #define MAX_EVENTS 8
 
 #define INPUT_BUF_SIZE 256
+#define TOR_DATA_BUF_SIZE 16
+
+#define MIN(a,b) (a < b ? a : b)
 
 
 int resolve_sockaddr(const char* host, const char* port_str, sock_addr_t* out) 
@@ -176,7 +179,7 @@ bool handle_relay_msg(client_session_t* session, stream_hashmap_t* hashmap, msg_
 
         if (relay_buffer->cmd == RELAY_DATA)
         {
-            printf("[RELAY] Disconnected from: %d\n", relay_buffer->stream_id);
+            printf("[RELAY] Got data from: %d\n", relay_buffer->stream_id);
 
             stream_hashmap_entry_t* entry =
                 socket_hashmap_find(hashmap, relay_buffer->stream_id);
@@ -187,7 +190,12 @@ bool handle_relay_msg(client_session_t* session, stream_hashmap_t* hashmap, msg_
                 return false;
             }
 
+            relay_buffer->data[relay_buffer->length] = '\0';
+            printf("[RELAY] Data: %s | len(%u)\n", relay_buffer->data, relay_buffer->length);
+
             stream_push_data(&entry->data.buffers.recv_buffer, relay_buffer->data, relay_buffer->length);
+
+            printf("Stream(%u) size now: %d\n", entry->data.stream_id, entry->data.buffers.recv_buffer.size);
 
             return true;
         }
@@ -284,6 +292,97 @@ bool handle_input(client_session_t* session, stream_hashmap_t* hashmap, const ch
         }
 
         socket_hashmap_remove(hashmap, stream_id);
+
+        return true;
+    }
+    else if (strcmp(input_buffer, "send") == 0)
+    {
+        printf("Stream ID: ");
+
+        char stream_id_buffer[INPUT_BUF_SIZE];
+        fgets(stream_id_buffer, INPUT_BUF_SIZE, stdin);
+        stream_id_buffer[strcspn(stream_id_buffer, "\n")] = '\0';
+
+        uint32_t stream_id = atoi(stream_id_buffer);        
+
+        stream_hashmap_entry_t* entry = socket_hashmap_find(hashmap, stream_id);
+        if (entry == NULL)
+        {
+            printf("Couldn't find stream ID.\n");
+            return true;
+        }
+
+        printf("Data: ");
+
+        // WOULD ALLOW MORE THAN INPUT_BUF_SIZE BYTES
+        char data_input_buffer[INPUT_BUF_SIZE];
+        fgets(data_input_buffer, INPUT_BUF_SIZE, stdin);
+        data_input_buffer[strcspn(data_input_buffer, "\n")] = '\0';
+
+        msg_tor_relay_data_t* data = (msg_tor_relay_data_t*)&msg;
+        data->relay = TOR_RELAY;
+        data->cmd = RELAY_DATA;
+        data->stream_id = stream_id;
+        
+        data->length = strlen(data_input_buffer);
+        memcpy(data->data, data_input_buffer, data->length);
+
+        if (send_tor_buffer(session->sock_fd, &msg, &session->tls_key, session->onion_keys, session->cur_relays) == false)
+        {
+            fprintf(stderr, "Failed send buffer.\n");
+            close(session->sock_fd);
+            socket_hashmap_free(hashmap);
+            return false;
+        }
+
+        return true;
+    }
+    else if (strcmp(input_buffer, "recv") == 0)
+    {
+        printf("Stream ID: ");
+
+        char stream_id_buffer[INPUT_BUF_SIZE];
+        fgets(stream_id_buffer, INPUT_BUF_SIZE, stdin);
+        stream_id_buffer[strcspn(stream_id_buffer, "\n")] = '\0';
+
+        uint32_t stream_id = atoi(stream_id_buffer);        
+
+        stream_hashmap_entry_t* entry = socket_hashmap_find(hashmap, stream_id);
+        if (entry == NULL)
+        {
+            printf("Couldn't find stream ID.\n");
+            return true;
+        }
+
+        printf("Length: ");
+
+        char length_input_buffer[INPUT_BUF_SIZE];
+        fgets(length_input_buffer, INPUT_BUF_SIZE, stdin);
+        length_input_buffer[strcspn(length_input_buffer, "\n")] = '\0';
+
+        uint32_t length = atoi(length_input_buffer);
+        
+        char buffer[TOR_DATA_BUF_SIZE];
+
+        while (length)
+        {
+            uint32_t amount = stream_pop_data(&entry->data.buffers.recv_buffer, (uint8_t*)buffer, MIN(TOR_DATA_BUF_SIZE-1, length));
+
+            if (amount == 0)
+            {
+                break;
+            }
+
+            if (amount <= length)
+            {
+                length -= amount;
+                buffer[amount] = '\0';
+                printf("%s", buffer);
+                continue;
+            }
+        }
+
+        printf("\n");
 
         return true;
     }
