@@ -115,7 +115,7 @@ static bool process_relay_begin(relay_session_t* session, socket_hashmap_t* hash
 
     printf("Added a new connection!\n");
 
-    msg_tor_relay_connected* msg_connected = (msg_tor_relay_connected*)buffer;
+    msg_tor_relay_connected_t* msg_connected = (msg_tor_relay_connected_t*)buffer;
     msg_connected->relay = TOR_RELAY;
     msg_connected->cmd = RELAY_CONNECTED;
     if (send_tor_buffer(session->last_fd, buffer, &session->tls_last_key, &session->onion_key, true) == false)

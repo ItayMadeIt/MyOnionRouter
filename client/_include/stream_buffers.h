@@ -14,14 +14,9 @@ typedef struct circular_buffer
     uint32_t capacity;
 } circular_buffer_t;
 
-typedef struct stream_buffer{
-    circular_buffer_t recv_buffer;
-    circular_buffer_t send_buffer;
-} stream_buffer_t;
-
-void init_stream_buffer (stream_buffer_t* stream_buffer);
+void init_stream_buffer (circular_buffer_t* stream_buffer);
 void stream_push_data   (circular_buffer_t* buffer, const uint8_t* data, const uint32_t size);
 uint32_t stream_pop_data(circular_buffer_t* buffer, uint8_t* data, const uint32_t size);
-void free_stream_buffer (stream_buffer_t* stream_buffer);
+void free_stream_buffer (circular_buffer_t* stream_buffer);
 
 #endif // __STREAM_DATA_MANAGER_H__

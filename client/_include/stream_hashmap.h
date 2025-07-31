@@ -11,7 +11,7 @@
 #define HASHMAP_AMOUNT 2048
 
 typedef struct stream_data {
-    stream_buffer_t buffers;
+    circular_buffer_t recv_buffer;
     uint16_t stream_id;
 } stream_data_t;
 

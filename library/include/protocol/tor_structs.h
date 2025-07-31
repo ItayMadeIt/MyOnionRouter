@@ -7,6 +7,7 @@
 
 #define TOR_MSG_SIZE 512
 #define RELAY_MSG_SIZE (TOR_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t) - sizeof(uint16_t) - sizeof(uint8_t)*DIGEST_LEN - sizeof(uint16_t) - sizeof(uint8_t))
+#define RELAY_DATA_MSG_SIZE RELAY_MSG_SIZE
 
 typedef struct msg_tor_buffer {
     uint8_t data[TOR_MSG_SIZE];
@@ -46,6 +47,12 @@ typedef struct msg_tor_padding {
     uint8_t data[TOR_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t)];
 } __attribute__((packed)) msg_tor_padding_t;
 
+typedef struct msg_tor_destroy {
+    uint16_t circ_id;
+    uint8_t cmd; 
+    uint8_t data[TOR_MSG_SIZE - sizeof(uint16_t) - sizeof(uint8_t)];
+} __attribute__((packed)) msg_tor_destroy_t;
+
 
 typedef struct msg_tor_create {
     uint16_t circ_id;
@@ -84,7 +91,7 @@ typedef struct msg_tor_relay_data {
     uint16_t length;
     uint8_t cmd;
 
-    uint8_t data[RELAY_MSG_SIZE];
+    uint8_t data[RELAY_DATA_MSG_SIZE];
     
 } __attribute__((packed)) msg_tor_relay_data_t;
 
@@ -172,7 +179,7 @@ typedef struct msg_tor_relay_connected {
 
     uint8_t data[RELAY_MSG_SIZE];
 
-} __attribute__((packed)) msg_tor_relay_connected;
+} __attribute__((packed)) msg_tor_relay_connected_t;
 
 typedef struct tls_key_buffer {
     uint8_t public_key[ASYMMETRIC_KEY_BYTES];

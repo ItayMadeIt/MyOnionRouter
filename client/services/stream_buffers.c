@@ -47,10 +47,9 @@ static void grow_buffer(circular_buffer_t* buffer)
     }
 }
 
-void init_stream_buffer(stream_buffer_t *stream_buffer)
+void init_stream_buffer(circular_buffer_t* buffer)
 {
-    init_buffer(&stream_buffer->recv_buffer);
-    init_buffer(&stream_buffer->send_buffer);
+    init_buffer(buffer);
 }
 
 void stream_push_data(circular_buffer_t *buffer, const uint8_t *data, const uint32_t size)
@@ -111,8 +110,7 @@ uint32_t stream_pop_data(circular_buffer_t *buffer, uint8_t *data, const uint32_
     return read_size;
 }
 
-void free_stream_buffer(stream_buffer_t *stream_buffer)
+void free_stream_buffer(circular_buffer_t* buffer)
 {
-    free_buffer(&stream_buffer->recv_buffer);
-    free_buffer(&stream_buffer->send_buffer);
+    free_buffer(buffer);
 }

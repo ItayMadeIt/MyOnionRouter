@@ -17,7 +17,7 @@ void socket_hashmap_free(stream_hashmap_t *map)
     {
         if (map->entries[i].entry_type == HASHMAP_STATE_FILLED)
         {
-            free_stream_buffer(&map->entries[i].data.buffers);
+            free_stream_buffer(&map->entries[i].data.recv_buffer);
         }
     }
 }
@@ -46,7 +46,7 @@ stream_hashmap_entry_t* socket_hashmap_insert(stream_hashmap_t *map, uint16_t st
  
     map->entries[index].data.stream_id = stream_id;
 
-    init_stream_buffer(&map->entries[index].data.buffers);
+    init_stream_buffer(&map->entries[index].data.recv_buffer);
 
     return &map->entries[index];
 }
@@ -86,7 +86,7 @@ bool socket_hashmap_remove(stream_hashmap_t *map, uint16_t stream_id)
                map->entries[index].data.stream_id == stream_id)
         {
             map->entries[index].entry_type = HASHMAP_STATE_DELETED;
-            free_stream_buffer(&map->entries[index].data.buffers);
+            free_stream_buffer(&map->entries[index].data.recv_buffer);
             return true;
         }
 

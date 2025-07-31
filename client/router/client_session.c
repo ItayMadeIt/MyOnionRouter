@@ -8,6 +8,7 @@
 
 #include "client.h"
 #include "net_messages.h"
+#include "tor_net_messages.h"
 #include "protocol/tor_structs.h"
 #include "stream_buffers.h"
 #include "stream_hashmap.h"
@@ -28,7 +29,31 @@
 #define MIN(a,b) (a < b ? a : b)
 
 
-int resolve_sockaddr(const char* host, const char* port_str, sock_addr_t* out) 
+static uint32_t read_input(char *buffer, size_t size, const char *prompt)
+{
+    printf("%s: ", prompt);
+
+    if (fgets(buffer, size, stdin) != NULL)
+    {
+        uint32_t newline_index = strcspn(buffer, "\n");
+        buffer[newline_index] = '\0'; 
+        return newline_index;
+    }
+    else
+    {
+        buffer[0] = '\0'; 
+        return 0;
+    }
+}
+
+static uint32_t input_int(const char *prompt)
+{
+    char input_buff[INPUT_BUF_SIZE];
+    read_input(input_buff, INPUT_BUF_SIZE, prompt);
+    return atoi(input_buff); 
+}
+
+static int resolve_sockaddr(const char* host, const char* port_str, sock_addr_t* out) 
 {
     struct addrinfo hints, *res;
     int status;
@@ -84,21 +109,15 @@ void init_session(client_session_t* session, int sock_fd, const circuit_relay_li
 
 static bool handle_create_message(client_session_t* session, msg_tor_buffer_t* buffer)
 {
-    // Send CREATE msg
-    msg_tor_create_t* create_msg = (msg_tor_create_t*)buffer;
-    create_msg->circ_id = 0;
-    create_msg->cmd = TOR_CREATE;
-    get_public_identity_key(&client_vars.id_key, create_msg->public_client_key);
+    if (tor_send_create_msg(session, buffer, &client_vars.id_key) == false)
+    {
+        return client_error;
+    }
 
-    send_tor_buffer(session->sock_fd, buffer, &session->tls_key, NULL, 0);
-
-    // Send CREATE msg
     msg_tor_created_t* response = (msg_tor_created_t*)buffer;
-    recv_tor_buffer(session->sock_fd, buffer, &session->tls_key, NULL, 0);
-    
+    recv_tor_buffer(session->sock_fd, buffer, &session->tls_key, NULL, 0);  
     if (response->cmd != TOR_CREATED)
     {
-        free_session(session);
         return client_error;
     } 
     
@@ -109,40 +128,20 @@ client_code_t create_relay_circuit(client_session_t* session, msg_tor_buffer_t* 
 {
     while (session->cur_relays < session->relays->relay_amount)
     {
-        msg_tor_relay_extend_t* msg_extend = (msg_tor_relay_extend_t*)buffer;
-        msg_extend->relay = TOR_RELAY;
-
-        msg_extend->cmd = RELAY_EXTEND;
-        msg_extend->circ_id = 0;
-        memset(&msg_extend->digest, 0, DIGEST_LEN);
-        
-        get_public_identity_key(session->tls_key.identity, msg_extend->client_public_key);
-        
-        memcpy(
-            &msg_extend->relay_addr, 
-            &session->relays->relays[session->cur_relays], 
-            sizeof(sock_addr_t)
-        );
-
-        // session->onion_keys
-        if (!send_tor_buffer(
-            session->sock_fd, buffer,  &session->tls_key, session->onion_keys, session->cur_relays))
+        if (tor_send_extend_msg(session, buffer, &client_vars.id_key, &session->relays->relays[session->cur_relays]) == false)
         {
-            close(session->sock_fd);
             return client_error;
         }
 
-        if (!recv_tor_buffer(
-            session->sock_fd, buffer, &session->tls_key, session->onion_keys, session->cur_relays))
+        if (recv_tor_buffer(
+            session->sock_fd, buffer, &session->tls_key, session->onion_keys, session->cur_relays) == false)
         {
-            close(session->sock_fd);
             return client_error;            
         }
 
         msg_tor_relay_extended_t* extended = (msg_tor_relay_extended_t*)buffer;
         if (extended->cmd != RELAY_EXTENDED)
         {
-            close(session->sock_fd);
             return client_error;
         }
 
@@ -152,53 +151,58 @@ client_code_t create_relay_circuit(client_session_t* session, msg_tor_buffer_t* 
     return client_success;
 }
 
-bool handle_relay_msg(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* buffer)
+inline static bool handle_relay_relay_msg(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* buffer, client_code_t* response)
 {
-    (void)session;
+    (void)session; (void)response;
+    
+    msg_tor_relay_t* relay_buffer = (msg_tor_relay_t*)buffer;
+
+    if (relay_buffer->cmd == RELAY_CONNECTED)
+    {
+        printf("[RELAY] Recieved connnected: %d\n", relay_buffer->stream_id);
+
+        return true;
+    }
+
+    if (relay_buffer->cmd == RELAY_END)
+    {
+        printf("[RELAY] Disconnected from: %d\n", relay_buffer->stream_id);
+
+        socket_hashmap_remove(hashmap, relay_buffer->stream_id);
+
+        return true;
+    }
+
+    if (relay_buffer->cmd == RELAY_DATA)
+    {
+        printf("[RELAY] Get data: %d\n", relay_buffer->stream_id);
+
+        stream_hashmap_entry_t* entry =
+            socket_hashmap_find(hashmap, relay_buffer->stream_id);
+
+        if (entry == NULL)
+        {
+            printf("[ERROR] GOT DATA TO INVALID STREAM ID\n");
+            return false;
+        }
+
+        stream_push_data(&entry->data.recv_buffer, relay_buffer->data, relay_buffer->length);
+
+        return true;
+    }
+
+    return  true;
+}
+
+bool handle_relay_msg(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* buffer, client_code_t* response)
+{
+    (void)session; (void)response;
 
     msg_tor_t* msg_buffer = (msg_tor_t*)buffer;
     
     if (msg_buffer->cmd == TOR_RELAY)
     {
-        msg_tor_relay_t* relay_buffer = (msg_tor_relay_t*)buffer;
-
-        if (relay_buffer->cmd == RELAY_CONNECTED)
-        {
-            printf("[RELAY] Recieved connnected: %d\n", relay_buffer->stream_id);
-            return true;
-        }
-
-        if (relay_buffer->cmd == RELAY_END)
-        {
-            printf("[RELAY] Disconnected from: %d\n", relay_buffer->stream_id);
-
-            socket_hashmap_remove(hashmap, relay_buffer->stream_id);
-
-            return true;
-        }
-
-        if (relay_buffer->cmd == RELAY_DATA)
-        {
-            printf("[RELAY] Got data from: %d\n", relay_buffer->stream_id);
-
-            stream_hashmap_entry_t* entry =
-                socket_hashmap_find(hashmap, relay_buffer->stream_id);
-
-            if (entry == NULL)
-            {
-                printf("[ERROR] GOT DATA TO INVALID STREAM ID\n");
-                return false;
-            }
-
-            relay_buffer->data[relay_buffer->length] = '\0';
-            printf("[RELAY] Data: %s | len(%u)\n", relay_buffer->data, relay_buffer->length);
-
-            stream_push_data(&entry->data.buffers.recv_buffer, relay_buffer->data, relay_buffer->length);
-
-            printf("Stream(%u) size now: %d\n", entry->data.stream_id, entry->data.buffers.recv_buffer.size);
-
-            return true;
-        }
+        return handle_relay_relay_msg(session, hashmap, buffer, response);
     }
 
     if (msg_buffer->cmd == TOR_PADDING)
@@ -207,188 +211,291 @@ bool handle_relay_msg(client_session_t* session, stream_hashmap_t* hashmap, msg_
         return true;
     }
 
-    if (msg_buffer->cmd == TOR_DESTROY)
+    return true;
+}
+
+inline static bool handle_input_ping(client_session_t* session, msg_tor_buffer_t* msg, client_code_t* response)
+{
+    if (tor_send_ping_msg(session, msg) == false)
     {
-        printf("[RELAY] Recieved destroy: %d. Stops program.\n", msg_buffer->circ_id);
+        fprintf(stderr, "Failed send buffer.\n");
+        *response = client_error;
+        return false;
+    }
+    
+    return true;
+}
+
+inline static bool handle_input_destroy(client_session_t* session, msg_tor_buffer_t* msg, client_code_t* response)
+{
+    msg_tor_destroy_t* destroy = (msg_tor_destroy_t*) &msg;
+    destroy->cmd = TOR_DESTROY;
+
+    if (tor_send_destroy_msg(session, msg) == false)
+    {
+        fprintf(stderr, "Failed send buffer.\n");
+        *response = client_error;
+        return false;
+    }
+
+    *response = client_success;
+    return false;
+}
+
+inline static bool handle_input_connect(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* msg, client_code_t* response)
+{
+    char ip_addr[INPUT_BUF_SIZE];
+    read_input(ip_addr, INPUT_BUF_SIZE, "IP/Addr");
+
+    char port_addr[INPUT_BUF_SIZE];
+    read_input(port_addr, INPUT_BUF_SIZE, "Port");
+
+    uint32_t stream_id = gen_stream_id(hashmap);        
+    socket_hashmap_insert(hashmap, stream_id);
+    printf("Stream ID: %u\n", stream_id);
+
+    sock_addr_t sock;
+    resolve_sockaddr(ip_addr, port_addr, &sock); 
+    
+    if (tor_send_begin_msg(session, msg, stream_id, &sock) == false)
+    {
+        fprintf(stderr, "Failed send buffer.\n");
+        *response = client_error;
         return false;
     }
 
     return true;
 }
+inline static bool handle_input_close(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* msg, client_code_t* response)
+{
+    uint32_t stream_id = input_int("Stream ID");
+    
+    if (tor_send_end_msg(session, msg, stream_id) == false)
+    {
+        fprintf(stderr, "Failed send buffer.\n");
+        *response = client_error;
+        return false;
+    }
 
-bool handle_input(client_session_t* session, stream_hashmap_t* hashmap, const char input_buffer[INPUT_BUF_SIZE])
+    socket_hashmap_remove(hashmap, stream_id);
+
+    return true;
+}
+
+inline static bool handle_input_send(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* msg, client_code_t* response)
+{
+    uint32_t stream_id = input_int("Stream ID");
+
+    stream_hashmap_entry_t* entry = socket_hashmap_find(hashmap, stream_id);
+    if (entry == NULL)
+    {
+        printf("Couldn't find stream ID.\n");
+        return true;
+    }
+
+    uint32_t length = input_int("Data length");
+    char* data_input_buffer = (char*)malloc(sizeof(char) * length);
+    uint32_t input_length = read_input(data_input_buffer, length, "Data");
+
+    uint32_t index = 0;
+    while (index < input_length)
+    {
+        uint32_t cur_data_length = MIN(RELAY_DATA_MSG_SIZE, input_length - index);
+
+        if (tor_send_data_msg(
+            session, msg, stream_id, (uint8_t*)data_input_buffer + index, cur_data_length) == false)
+        {
+            fprintf(stderr, "Failed send buffer.\n");
+            
+            free(data_input_buffer);
+
+            *response = client_error;
+            return false;
+        }
+
+        index += cur_data_length;
+    }
+
+    free(data_input_buffer);
+
+    return true;
+}
+
+inline static bool handle_input_recv(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* msg, client_code_t* response)
+{
+    (void)session; (void)msg; (void)response;
+
+    uint32_t stream_id = input_int("Stream ID");
+
+    stream_hashmap_entry_t* entry = socket_hashmap_find(hashmap, stream_id);
+    if (entry == NULL)
+    {
+        printf("Couldn't find stream ID.\n");
+        return true;
+    }
+
+    uint32_t length = input_int("Length");
+    
+    char buffer[TOR_DATA_BUF_SIZE+1];
+
+    while (length)
+    {
+        uint32_t amount = stream_pop_data(&entry->data.recv_buffer, (uint8_t*)buffer, MIN(TOR_DATA_BUF_SIZE, length));
+
+        if (amount == 0)
+        {
+            break;
+        }
+
+        if (amount <= length)
+        {
+            length -= amount;
+            buffer[amount] = '\0';
+            printf("%s", buffer);
+            continue;
+        }
+    }
+
+    printf("\n");
+
+    return true;
+}
+
+bool handle_input(client_session_t* session, stream_hashmap_t* hashmap, const char input_buffer[INPUT_BUF_SIZE], client_code_t* response)
 {
     msg_tor_buffer_t msg;
 
     if (strcmp(input_buffer, "ping") == 0)
     {
-        msg_tor_padding_t* padding = (msg_tor_padding_t*) &msg;
-        padding->circ_id = 0;
-        padding->cmd = TOR_PADDING;
-
-        if (send_tor_buffer(session->sock_fd, &msg, &session->tls_key, session->onion_keys, session->cur_relays) == false)
-        {
-            close(session->sock_fd);
-            socket_hashmap_free(hashmap);
-            return false;
-        }
-        return true;
+        return handle_input_ping(session, &msg, response);
+    }
+    else if (strcmp(input_buffer, "destroy") == 0)
+    {
+        return handle_input_destroy(session, &msg, response);
     }
     else if (strcmp(input_buffer, "connect") == 0)
     {
-        printf("IP/Addr: ");
-
-        char ip_addr[INPUT_BUF_SIZE];
-        fgets(ip_addr, INPUT_BUF_SIZE, stdin);
-        ip_addr[strcspn(ip_addr, "\n")] = '\0';
-
-        printf("Port: ");
-
-        char port_addr[INPUT_BUF_SIZE];
-        fgets(port_addr, INPUT_BUF_SIZE, stdin);
-        port_addr[strcspn(port_addr, "\n")] = '\0';
-
-        uint32_t stream_id = gen_stream_id(hashmap);        
-        socket_hashmap_insert(hashmap, stream_id);
-        printf("Stream ID: %u\n", stream_id);
-
-        msg_tor_relay_begin_t* begin = (msg_tor_relay_begin_t*)&msg;
-        begin->relay = TOR_RELAY;
-        begin->cmd = RELAY_BEGIN;
-        begin->stream_id = stream_id;
-        resolve_sockaddr(ip_addr, port_addr, &begin->sock_addr); 
-
-        if (send_tor_buffer(session->sock_fd, &msg, &session->tls_key, session->onion_keys, session->cur_relays) == false)
-        {
-            fprintf(stderr, "Failed send buffer.\n");
-            close(session->sock_fd);
-            socket_hashmap_free(hashmap);
-            return false;
-        }
-
-        return true;
+        return handle_input_connect(session, hashmap, &msg, response);
     }
     else if (strcmp(input_buffer, "close") == 0)
     {
-        printf("Stream ID: ");
-
-        char stream_id_buffer[INPUT_BUF_SIZE];
-        fgets(stream_id_buffer, INPUT_BUF_SIZE, stdin);
-        stream_id_buffer[strcspn(stream_id_buffer, "\n")] = '\0';
-
-        uint32_t stream_id = atoi(stream_id_buffer);        
-
-        msg_tor_relay_begin_t* begin = (msg_tor_relay_begin_t*)&msg;
-        begin->relay = TOR_RELAY;
-        begin->cmd = RELAY_END;
-        begin->stream_id = stream_id;
-
-        if (send_tor_buffer(session->sock_fd, &msg, &session->tls_key, session->onion_keys, session->cur_relays) == false)
-        {
-            fprintf(stderr, "Failed send buffer.\n");
-            close(session->sock_fd);
-            socket_hashmap_free(hashmap);
-            return false;
-        }
-
-        socket_hashmap_remove(hashmap, stream_id);
-
-        return true;
+        return handle_input_close(session, hashmap, &msg, response);
     }
     else if (strcmp(input_buffer, "send") == 0)
     {
-        printf("Stream ID: ");
-
-        char stream_id_buffer[INPUT_BUF_SIZE];
-        fgets(stream_id_buffer, INPUT_BUF_SIZE, stdin);
-        stream_id_buffer[strcspn(stream_id_buffer, "\n")] = '\0';
-
-        uint32_t stream_id = atoi(stream_id_buffer);        
-
-        stream_hashmap_entry_t* entry = socket_hashmap_find(hashmap, stream_id);
-        if (entry == NULL)
-        {
-            printf("Couldn't find stream ID.\n");
-            return true;
-        }
-
-        printf("Data: ");
-
-        // WOULD ALLOW MORE THAN INPUT_BUF_SIZE BYTES
-        char data_input_buffer[INPUT_BUF_SIZE];
-        fgets(data_input_buffer, INPUT_BUF_SIZE, stdin);
-        data_input_buffer[strcspn(data_input_buffer, "\n")] = '\0';
-
-        msg_tor_relay_data_t* data = (msg_tor_relay_data_t*)&msg;
-        data->relay = TOR_RELAY;
-        data->cmd = RELAY_DATA;
-        data->stream_id = stream_id;
-        
-        data->length = strlen(data_input_buffer);
-        memcpy(data->data, data_input_buffer, data->length);
-
-        if (send_tor_buffer(session->sock_fd, &msg, &session->tls_key, session->onion_keys, session->cur_relays) == false)
-        {
-            fprintf(stderr, "Failed send buffer.\n");
-            close(session->sock_fd);
-            socket_hashmap_free(hashmap);
-            return false;
-        }
-
-        return true;
+        return handle_input_send(session, hashmap, &msg, response);
     }
     else if (strcmp(input_buffer, "recv") == 0)
     {
-        printf("Stream ID: ");
-
-        char stream_id_buffer[INPUT_BUF_SIZE];
-        fgets(stream_id_buffer, INPUT_BUF_SIZE, stdin);
-        stream_id_buffer[strcspn(stream_id_buffer, "\n")] = '\0';
-
-        uint32_t stream_id = atoi(stream_id_buffer);        
-
-        stream_hashmap_entry_t* entry = socket_hashmap_find(hashmap, stream_id);
-        if (entry == NULL)
-        {
-            printf("Couldn't find stream ID.\n");
-            return true;
-        }
-
-        printf("Length: ");
-
-        char length_input_buffer[INPUT_BUF_SIZE];
-        fgets(length_input_buffer, INPUT_BUF_SIZE, stdin);
-        length_input_buffer[strcspn(length_input_buffer, "\n")] = '\0';
-
-        uint32_t length = atoi(length_input_buffer);
-        
-        char buffer[TOR_DATA_BUF_SIZE];
-
-        while (length)
-        {
-            uint32_t amount = stream_pop_data(&entry->data.buffers.recv_buffer, (uint8_t*)buffer, MIN(TOR_DATA_BUF_SIZE-1, length));
-
-            if (amount == 0)
-            {
-                break;
-            }
-
-            if (amount <= length)
-            {
-                length -= amount;
-                buffer[amount] = '\0';
-                printf("%s", buffer);
-                continue;
-            }
-        }
-
-        printf("\n");
-
-        return true;
+        return handle_input_recv(session, hashmap, &msg, response);
     }
 
     printf("Invalid command: %s\n", input_buffer);
     return true;
+}
+
+bool handle_event(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* buffer, struct epoll_event* event, client_code_t* response)
+{
+    if (event->data.u32 == MY_EVENT_RELAY)
+    {
+        if (recv_tor_buffer(session->sock_fd, buffer, &session->tls_key, session->onion_keys, session->cur_relays) == false)
+        {
+            fprintf(stderr, "Guard stopped connection.\n");
+            *response = client_error;
+            return false;
+        }
+
+        if (handle_relay_msg(session, hashmap, buffer, response) == false)
+        {
+            return false;
+        }
+    }
+    else if (event->data.u32 == MY_EVENT_STDIN)
+    {
+        char input_buffer[INPUT_BUF_SIZE];
+        if (fgets(input_buffer, INPUT_BUF_SIZE, stdin) == NULL) 
+        {
+            fprintf(stderr, "stdin closed or read error\n");
+            exit(-1);
+        }
+        input_buffer[strcspn(input_buffer, "\n")] = '\0';
+
+        printf("Command: '%s'\n", input_buffer);
+
+        if (strcmp(input_buffer, "exit") == 0)
+        {
+            *response = client_success;
+            return false;
+        }
+
+        if (handle_input(session, hashmap, input_buffer, response) == false)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        fprintf(stderr, "Invalid u32, shouldn't happen: %d\n", event->data.u32);
+        abort();
+    }
+    return true;
+}
+
+bool handle_event_chunk(client_session_t* session, stream_hashmap_t* hashmap, int epoll_fd, msg_tor_buffer_t* buffer, client_code_t* response)
+{
+    struct epoll_event events[MAX_EVENTS];
+    int n = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
+    
+    if (n == -1)
+    {
+        *response = client_error;
+
+        return false;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        if (handle_event(session, hashmap, buffer, &events[i], response) == false)
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+client_code_t process_events(client_session_t* session, stream_hashmap_t* hashmap, msg_tor_buffer_t* buffer)
+{
+    client_code_t response = client_success; 
+
+    int epoll_fd = epoll_create1(0);
+    if (epoll_fd == -1) 
+    {
+        fprintf(stderr, "Couldn't create an epoll: epoll_create1\n");
+        exit(-1);
+    }
+
+    struct epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.u32 = MY_EVENT_STDIN;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fileno(stdin), &ev);
+
+    ev.data.u32 = MY_EVENT_RELAY;
+    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, session->sock_fd, &ev);
+
+    while (true)
+    {
+        if (handle_event_chunk(session, hashmap, epoll_fd, buffer, &response) == false)
+        {
+            socket_hashmap_free(hashmap);
+            free_session(session);
+            return response;
+        }
+    }
+
+    free_session(session);
+    socket_hashmap_free(hashmap);
+
+    return client_success;
 }
 
 client_code_t process_client_session(client_session_t* session)
@@ -403,104 +510,18 @@ client_code_t process_client_session(client_session_t* session)
         return return_value;
     }
 
-
     session->cur_relays = 1;
     return_value = create_relay_circuit(session, &buffer);
     if (return_value != client_success)
     {
-        session->sock_fd = -1;
         free_session(session);
         return return_value;
-    }
-
-    int epoll_fd = epoll_create1(0);
-    if (epoll_fd == -1) 
-    {
-        fprintf(stderr, "Couldn't create an epoll: epoll_create1\n");
-        exit(-1);
     }
 
     stream_hashmap_t hashmap;
     socket_hashmap_init(&hashmap);
 
-    struct epoll_event ev;
-    ev.events = EPOLLIN;
-    ev.data.u32 = MY_EVENT_STDIN;
-    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fileno(stdin), &ev);
-
-    ev.data.u32 = MY_EVENT_RELAY;
-    epoll_ctl(epoll_fd, EPOLL_CTL_ADD, session->sock_fd, &ev);
-
-    while (true)
-    {
-        struct epoll_event events[MAX_EVENTS];
-        int n = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
-        
-        if (n == -1)
-        {
-            socket_hashmap_free(&hashmap);
-            return client_error;
-        }
-        int i = 0;
-        while (i < n)
-        {
-            if (events[i].data.u32 == MY_EVENT_RELAY)
-            {
-                if (recv_tor_buffer(session->sock_fd, &buffer, &session->tls_key, session->onion_keys, session->cur_relays) == false)
-                {
-                    close(session->sock_fd);
-                    socket_hashmap_free(&hashmap);
-                    fprintf(stderr, "Guard stopped connection.\n");
-                    return client_error;
-                }
-
-                if (handle_relay_msg(session, &hashmap, &buffer) == false)
-                {
-                    close(session->sock_fd);
-                    socket_hashmap_free(&hashmap);
-                    return client_error;
-                }
-            }
-            else if (events[i].data.u32 == MY_EVENT_STDIN)
-            {
-                char input_buffer[256];
-                if (fgets(input_buffer, INPUT_BUF_SIZE, stdin) == NULL) 
-                {
-                    fprintf(stderr, "stdin closed or read error\n");
-                    exit(-1);
-                }
-                input_buffer[strcspn(input_buffer, "\n")] = '\0';
-
-                printf("Command: '%s' (len: %zu)\n", input_buffer, strlen(input_buffer));
-
-                if (strcmp(input_buffer, "exit") == 0)
-                {
-                    close(session->sock_fd);
-                    socket_hashmap_free(&hashmap);
-
-                    return client_success;
-                }
-
-                if (handle_input(session, &hashmap, input_buffer) == false)
-                {
-                    close(session->sock_fd);
-                    socket_hashmap_free(&hashmap);
-                    return client_error;
-                }
-            }
-            else
-            {
-                fprintf(stderr, "Invalid u32, shouldn't happen: %d\n", ev.data.u32);
-                abort();
-            }
-            i++;
-        }
-    }
-
-    close(session->sock_fd);
-    socket_hashmap_free(&hashmap);
-
-    return client_success;
+    return process_events(session, &hashmap, &buffer);
 }
 
 void free_session(client_session_t* session)
