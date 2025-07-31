@@ -26,7 +26,9 @@ bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
     // no need to encrypt: uint16_t circ_id, uint8_t cmd
     if (onion_key && to_client)
     { 
+        #ifdef DEBUG
         printf("Encrypt "); print_block(&onion_key->symmetric_key);
+        #endif
 
         symmetric_encrypt(
             onion_key, 
@@ -37,7 +39,9 @@ bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
 
     if (tls_key)
     {
+        #ifdef DEBUG
         printf("Encrypt tls "); print_block(&tls_key->symmetric_key);
+        #endif
 
         symmetric_encrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
     }

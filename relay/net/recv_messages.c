@@ -30,7 +30,9 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
 
     if (tls_key)
     {
-        printf("Decrypt tls"); print_block(&tls_key->symmetric_key);
+        #ifdef DEBUG
+        printf("Decrypt tls "); print_block(&tls_key->symmetric_key);
+        #endif
 
         symmetric_decrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
     }
@@ -38,7 +40,9 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
     // no need to encrypt/decrypt: uint16_t circ_id, uint8_t cmd
     if (onion_key && from_client)
     {
+        #ifdef DEBUG
         printf("Decrypt "); print_block(&onion_key->symmetric_key);
+        #endif
         symmetric_decrypt(
             onion_key, 
             (uint8_t*)data + sizeof(uint8_t) + sizeof(uint16_t), 

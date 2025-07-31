@@ -161,6 +161,19 @@ typedef struct msg_tor_relay_end {
 
 } __attribute__((packed)) msg_tor_relay_end_t;
 
+typedef struct msg_tor_relay_connected {
+    uint16_t circ_id;
+    uint8_t relay; // CMD = RELAY  
+    
+    uint16_t stream_id;
+    uint8_t digest[DIGEST_LEN];
+    uint16_t length;
+    uint8_t cmd;
+
+    uint8_t data[RELAY_MSG_SIZE];
+
+} __attribute__((packed)) msg_tor_relay_connected;
+
 typedef struct tls_key_buffer {
     uint8_t public_key[ASYMMETRIC_KEY_BYTES];
 } __attribute__((packed)) tls_key_buffer_t;

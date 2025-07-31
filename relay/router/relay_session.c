@@ -91,14 +91,12 @@ relay_code_t process_relay_session(relay_session_t* session)
     }
 
     msg_tor_relay_t* msg = (msg_tor_relay_t*)&buffer;
+    printf("Init CMD: %u RELAY_CMD: %u\n", msg->relay, msg->cmd);
     if (msg->relay != TOR_RELAY)
     {
-        printf("First tor message isn't relay msg %d\n", msg->relay);
-        free_relay_session(session);
-        return relay_unexpected_msg;
+        return process_end_relay_session(session, &buffer);
     }
 
-    printf("msg relay cmd: %d\n", msg->cmd);
     if (msg->cmd == RELAY_EXTEND)
     {
         return process_middle_relay_session(session, &buffer);

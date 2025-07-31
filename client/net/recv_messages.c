@@ -1,6 +1,5 @@
 #include <net_messages.h>
 #include <protocol/server_net_structs.h>
-#include <stdio.h>
 #include <utils/debug.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -29,7 +28,9 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
 
     if (tls_key)
     {
+        #ifdef DEBUG
         printf("Decrypt tls "); print_block(&tls_key->symmetric_key);
+        #endif
 
         symmetric_decrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
     }
@@ -39,8 +40,10 @@ bool recv_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
         // no need to encrypt/decrypt: uint16_t circ_id, uint8_t cmd
         for (uint8_t i = 0; i < onion_amount; i++)
         {
+            #ifdef DEBUG
             printf("Decrypt onion %d ", i);print_block(&onion_key[i].symmetric_key);
-
+            #endif
+            
             symmetric_decrypt(
                 &onion_key[i], 
                 (uint8_t*)data + sizeof(uint16_t) + sizeof(uint8_t), 

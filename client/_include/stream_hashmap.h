@@ -38,8 +38,7 @@ void socket_hashmap_free(stream_hashmap_t* map);
 
 stream_hashmap_entry_t* socket_hashmap_insert(stream_hashmap_t* map, uint16_t stream_id);
 stream_hashmap_entry_t* socket_hashmap_find(stream_hashmap_t* map, uint16_t stream_id);
-// Doesn't clean up resources (no free buffers)
-bool socket_hashmap_remove_entry(stream_hashmap_t* map, uint16_t stream_id);
+bool socket_hashmap_remove(stream_hashmap_t* map, uint16_t stream_id);
 
 uint32_t gen_stream_id(stream_hashmap_t* hashmap) ;
 

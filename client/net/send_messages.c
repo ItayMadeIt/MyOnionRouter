@@ -1,12 +1,12 @@
 #include "protocol/server_net_structs.h"
 #include <net_messages.h>
-#include <stdio.h>
-#include <utils/debug.h>
 #include "protocol/tor_structs.h"
 
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
+
+#include <utils/debug.h>
 
 bool send_tls_msg(int sock_fd, tls_key_buffer_t *data) 
 {
@@ -22,7 +22,9 @@ bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
         // no need to encrypt/decrypt: uint16_t circ_id, uint8_t cmd
         for (uint8_t i = onion_amount; i-- > 0;)
         {
+            #ifdef DEBUG
             printf("Encrypt "); print_block(&onion_key[i].symmetric_key);
+            #endif
 
             symmetric_encrypt(
                 &onion_key[i], 
@@ -34,7 +36,9 @@ bool send_tor_buffer(int sock_fd, msg_tor_buffer_t* data, key_data_t* tls_key, k
 
     if (tls_key)
     {
+        #ifdef DEBUG
         printf("Encrypt tls "); print_block(&tls_key->symmetric_key);
+        #endif
 
         symmetric_encrypt(tls_key, (uint8_t*)data, sizeof(msg_tor_buffer_t));
     }

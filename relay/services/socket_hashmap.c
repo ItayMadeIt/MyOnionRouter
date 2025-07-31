@@ -85,7 +85,7 @@ socket_hashmap_entry_t *socket_hashmap_find(socket_hashmap_t *map, uint16_t stre
     return NULL;
 }
 
-bool socket_hashmap_remove_entry(socket_hashmap_t *map, uint16_t stream_id)
+bool socket_hashmap_remove(socket_hashmap_t *map, uint16_t stream_id)
 {
     uint16_t start_index = stream_id % HASHMAP_AMOUNT;
     uint16_t index = start_index; 

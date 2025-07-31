@@ -105,22 +105,28 @@ static relay_code_t extend_relay(relay_session_t* session, msg_tor_buffer_t* buf
     return relay_success;
 }
 
-static bool handle_fd_common(relay_session_t* session, bool from_client, relay_code_t* response, msg_tor_t* msg)
+static bool handle_fd_common(relay_session_t* session, bool from_client, relay_code_t* response, msg_tor_t* recv_msg, msg_tor_t* send_msg_buffer)
 {
     int recv_sock_fd = from_client ? session->last_fd : session->next_fd;
     key_data_t* recv_tls_key = from_client ? &session->tls_last_key : &session->tls_next_key;
 
-    if (recv_tor_buffer(recv_sock_fd, (msg_tor_buffer_t*)msg, recv_tls_key, &session->onion_key, from_client) == false)
+    printf(from_client ? "Recv client\n" : "Recv relay\n");
+    if (recv_tor_buffer(recv_sock_fd, (msg_tor_buffer_t*)recv_msg, recv_tls_key, &session->onion_key, from_client) == false)
     {
         free_relay_session(session);
         *response = relay_error;
         return false;
     }
 
+    printf("Basic CMD: %u\n", recv_msg->cmd);
+
+    memmove(send_msg_buffer, recv_msg, sizeof(msg_tor_buffer_t));
+
     int send_sock_fd = from_client ? session->next_fd : session->last_fd;
     key_data_t* send_tls_key = from_client ? &session->tls_next_key : &session->tls_last_key;
 
-    if (send_tor_buffer(send_sock_fd, (msg_tor_buffer_t*)msg, send_tls_key, &session->onion_key, !from_client) == false)
+    printf(from_client ? "Send relay\n" : "Send client\n");
+    if (send_tor_buffer(send_sock_fd, (msg_tor_buffer_t*)send_msg_buffer, send_tls_key, &session->onion_key, !from_client) == false)
     {
         free_relay_session(session);
         *response = relay_error;
@@ -132,13 +138,13 @@ static bool handle_fd_common(relay_session_t* session, bool from_client, relay_c
 
 static bool handle_last_fd(relay_session_t* session, relay_code_t* response)
 {
-    msg_tor_t msg;
-    if (handle_fd_common(session, true, response, &msg) == false)
+    msg_tor_t recv, send;
+    if (handle_fd_common(session, true, response, &recv, &send) == false)
     {
         return false;
     }
 
-    if (msg.cmd == TOR_DESTROY)
+    if (recv.cmd == TOR_DESTROY)
     {
         shutdown(session->last_fd, SHUT_RDWR);
         shutdown(session->next_fd, SHUT_RDWR);
@@ -146,14 +152,25 @@ static bool handle_last_fd(relay_session_t* session, relay_code_t* response)
         *response = relay_success;
         return false;
     }
+    
+    printf("Recv CMD: %u\n", recv.cmd);
 
     return true;
 }
 
 static bool handle_next_fd(relay_session_t* session, relay_code_t* response)
 {
-    msg_tor_t msg;
-    return handle_fd_common(session, false, response, &msg);
+    msg_tor_t recv;
+    msg_tor_t send;
+
+    if (handle_fd_common(session, false, response, &recv, &send) == false)
+    {
+        return false;
+    }
+
+    printf("Relay CMD: %u\n", recv.cmd);
+
+    return true;
 }
 
 
@@ -161,10 +178,12 @@ static bool handle_event(relay_session_t* session, struct epoll_event* event, re
 {
     if (event->data.fd == session->last_fd)
     {
+        printf("Handle client event\n");
         return handle_last_fd(session, response);
     }
     else
     {
+        printf("Handle relay event\n");
         return handle_next_fd(session, response);
     }
 }

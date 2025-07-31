@@ -39,6 +39,6 @@ void socket_hashmap_apply(socket_hashmap_t *map, void (*apply_func)(socket_hashm
 
 socket_hashmap_entry_t* socket_hashmap_insert(socket_hashmap_t* map, uint16_t stream_id, int socket_fd);
 socket_hashmap_entry_t* socket_hashmap_find(socket_hashmap_t* map, uint16_t stream_id);
-bool socket_hashmap_remove_entry(socket_hashmap_t* map, uint16_t stream_id);
+bool socket_hashmap_remove(socket_hashmap_t* map, uint16_t stream_id);
 
 #endif // __SOCKET_HASHMAP_H__

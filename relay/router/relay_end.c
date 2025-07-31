@@ -115,6 +115,18 @@ static bool process_relay_begin(relay_session_t* session, socket_hashmap_t* hash
 
     printf("Added a new connection!\n");
 
+    msg_tor_relay_connected* msg_connected = (msg_tor_relay_connected*)buffer;
+    msg_connected->relay = TOR_RELAY;
+    msg_connected->cmd = RELAY_CONNECTED;
+    if (send_tor_buffer(session->last_fd, buffer, &session->tls_last_key, &session->onion_key, true) == false)
+    {
+        close(epoll_fd);
+        free_relay_session(session);
+        socket_hashmap_free(hashmap);
+        *response = relay_error;
+        return false;
+    }
+
     return true;
 }
 
@@ -195,8 +207,23 @@ static bool process_relay_end(relay_session_t* session, socket_hashmap_t* hashma
     shutdown(sock_fd, SHUT_RDWR);
     close(sock_fd);
 
-    socket_hashmap_remove_entry(hashmap, stream_id);
+    socket_hashmap_remove(hashmap, stream_id);
 
+    msg_end->cmd = RELAY_END;
+    msg_end->reason = TOR_REASON_END_DONE;
+    msg_end->stream_id = stream_id;
+    printf("Sending msg end %u.\n", stream_id);
+    if (send_tor_buffer(session->last_fd, buffer, &session->tls_last_key, &session->onion_key, true) == false)
+    {
+        close(epoll_fd);
+        free_relay_session(session);
+        socket_hashmap_free(hashmap);
+        
+        *response = relay_error;
+
+        return false;
+    }
+    
     return true;
 }
 
@@ -205,6 +232,7 @@ static bool process_client_msg(relay_session_t* session, socket_hashmap_t* hashm
     msg_tor_t* msg = (msg_tor_t*)buffer; 
     if (msg->cmd == TOR_DESTROY)
     {
+        printf("Destroy\n");
         close(epoll_fd);
         free_relay_session(session);
         socket_hashmap_free(hashmap);
@@ -214,6 +242,7 @@ static bool process_client_msg(relay_session_t* session, socket_hashmap_t* hashm
 
     if (msg->cmd == TOR_PADDING)
     {
+        printf("Padding\n");
         send_tor_buffer(session->last_fd, buffer, &session->tls_last_key, &session->onion_key, true);
         return true;
     }
@@ -221,10 +250,14 @@ static bool process_client_msg(relay_session_t* session, socket_hashmap_t* hashm
     // A message we dont yet handle.
     if (msg->cmd != TOR_RELAY)
     {
-        return true;
+        printf("NOT SUPPORTING CMD %u\n", msg->cmd);
+        
+        return false;// MUST BE CHANGED
     }
 
     msg_tor_relay_t* relay_msg = (msg_tor_relay_t*)buffer;
+
+    printf("Relay cmd: %u \n", relay_msg->cmd);
 
     if (relay_msg->cmd == RELAY_BEGIN)
     {
@@ -256,7 +289,7 @@ static bool process_internet_event(stream_data_t* stream_data, relay_session_t* 
         epoll_ctl(epoll_fd, EPOLL_CTL_DEL,stream_data->sock_fd, &ev);
  
         close(stream_data->sock_fd);
-        socket_hashmap_remove_entry(hashmap, stream_data->stream_id);
+        socket_hashmap_remove(hashmap, stream_data->stream_id);
         
         msg_tor_relay_end_t* tor_end_msg = (msg_tor_relay_end_t*)buffer;
         tor_end_msg->relay = TOR_RELAY;
@@ -298,10 +331,25 @@ static bool handle_event(relay_session_t* session, struct epoll_event* event, so
 {
     if (event->data.u32 == CLIENT_STREAM_ID)
     {
+        printf("Handle relay event.\n");
+
+        if (recv_tor_buffer(session->last_fd, buffer, &session->tls_last_key, &session->onion_key, true) == false)
+        {
+            close(session->last_fd);
+            close(epoll_fd);
+            socket_hashmap_free(hashmap);
+            free_relay_session(session);
+
+            *response = relay_error;
+
+            return false;
+        }
+
         return process_client_msg(session, hashmap, epoll_fd, buffer, response);
     }
     else
     {
+        printf("Handle internet event.\n");
         socket_hashmap_entry_t* entry = socket_hashmap_find(hashmap, event->data.u32);
         if (entry == NULL)
         {
@@ -363,6 +411,7 @@ relay_code_t process_end_relay_session(relay_session_t* session, msg_tor_buffer_
     {
         if (process_epoll_event(epoll_fd, session, &hashmap, buffer, &response) == false)
         {
+            printf("Ended with response %d\n", response);
             return response;
         }
     }
