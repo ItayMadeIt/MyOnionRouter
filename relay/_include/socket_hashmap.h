@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "stream_data_manager.h"
-
 // Hashmap amount, can't be higher than 2048 (meaning 2048 sockets)
 // 2^n for fast index%length speed up
 #define HASHMAP_AMOUNT 2048

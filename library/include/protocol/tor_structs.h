@@ -146,9 +146,11 @@ typedef struct msg_tor_relay_begin {
 
 typedef enum tor_relay_end_reasons
 {
-    TOR_REASON_END_EOF     = 1,
-    TOR_REASON_END_DONE    = 2,
-    TOR_REASON_END_DESTROY = 3,
+    TOR_REASON_END_EOF       = 1,
+    TOR_REASON_END_DONE      = 2,
+    TOR_REASON_END_DESTROY   = 3,
+    TOR_REASON_END_FAIL_INIT = 4,
+    TOR_REASON_END_ABSENT = 4,
 
 } tor_relay_end_reasons_t;
 

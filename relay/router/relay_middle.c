@@ -7,7 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "session.h"
-#include "stream_data_manager.h"
+#include "relay_messages.h"
+
 #include <utils/sock_utils.h>
 
 #include <unistd.h>
@@ -63,42 +64,26 @@ static relay_code_t extend_relay(relay_session_t* session, msg_tor_buffer_t* buf
 
     if (handle_tls_sender(session->next_fd, &session->tls_next_key) == false)
     {
-        free_relay_session(session);
         return relay_error;
     }
 
-    msg_tor_create_t* create = (msg_tor_create_t*)buffer;
-    create->cmd = TOR_CREATE;
-    memmove(create->public_client_key, extend->client_public_key, ASYMMETRIC_KEY_BYTES);
-
-    // Send CREATE msg
-    if (send_tor_buffer(session->next_fd, buffer, &session->tls_next_key, NULL, false) == false)
+    if (tor_send_middle_relay_create(session, buffer, extend->client_public_key) == false)
     {
-        free_relay_session(session);
         return relay_error;
     }
 
     msg_tor_created_t* created = (msg_tor_created_t*)buffer;
-    // Recv CREATED msg
     if (recv_tor_buffer(session->next_fd, buffer, &session->tls_next_key, NULL, false) == false)
     {
-        free_relay_session(session);
         return relay_error;
     }
     if (created->cmd != TOR_CREATED)
     {
-        printf("Failed to get CREATED\n");
-        free_relay_session(session);
         return relay_error;
     }
 
-    msg_tor_relay_extended_t* extended = (msg_tor_relay_extended_t*)buffer;
-    extended->relay = TOR_RELAY;
-    extended->cmd = RELAY_EXTENDED;
-
-    if (send_tor_buffer(session->last_fd, buffer, &session->tls_last_key, &session->onion_key, true) == false)
+    if (tor_send_middle_relay_extended(session, buffer) == false)
     {
-        free_relay_session(session);
         return relay_error;
     }
     
@@ -110,25 +95,18 @@ static bool handle_fd_common(relay_session_t* session, bool from_client, relay_c
     int recv_sock_fd = from_client ? session->last_fd : session->next_fd;
     key_data_t* recv_tls_key = from_client ? &session->tls_last_key : &session->tls_next_key;
 
-    printf(from_client ? "Recv client\n" : "Recv relay\n");
     if (recv_tor_buffer(recv_sock_fd, (msg_tor_buffer_t*)recv_msg, recv_tls_key, &session->onion_key, from_client) == false)
     {
-        free_relay_session(session);
         *response = relay_error;
         return false;
     }
-
-    printf("Basic CMD: %u\n", recv_msg->cmd);
-
     memmove(send_msg_buffer, recv_msg, sizeof(msg_tor_buffer_t));
 
     int send_sock_fd = from_client ? session->next_fd : session->last_fd;
     key_data_t* send_tls_key = from_client ? &session->tls_next_key : &session->tls_last_key;
 
-    printf(from_client ? "Send relay\n" : "Send client\n");
     if (send_tor_buffer(send_sock_fd, (msg_tor_buffer_t*)send_msg_buffer, send_tls_key, &session->onion_key, !from_client) == false)
     {
-        free_relay_session(session);
         *response = relay_error;
         return false;
     }
@@ -146,15 +124,10 @@ static bool handle_last_fd(relay_session_t* session, relay_code_t* response)
 
     if (recv.cmd == TOR_DESTROY)
     {
-        shutdown(session->last_fd, SHUT_RDWR);
-        shutdown(session->next_fd, SHUT_RDWR);
-        free_relay_session(session);
         *response = relay_success;
         return false;
     }
     
-    printf("Recv CMD: %u\n", recv.cmd);
-
     return true;
 }
 
@@ -168,22 +141,18 @@ static bool handle_next_fd(relay_session_t* session, relay_code_t* response)
         return false;
     }
 
-    printf("Relay CMD: %u\n", recv.cmd);
-
     return true;
 }
 
 
-static bool handle_event(relay_session_t* session, struct epoll_event* event, relay_code_t* response)
+static bool process_event(relay_session_t* session, struct epoll_event* event, relay_code_t* response)
 {
     if (event->data.fd == session->last_fd)
     {
-        printf("Handle client event\n");
         return handle_last_fd(session, response);
     }
     else
     {
-        printf("Handle relay event\n");
         return handle_next_fd(session, response);
     }
 }
@@ -194,7 +163,6 @@ relay_code_t process_middle_relay_session(relay_session_t* session, msg_tor_buff
     response = extend_relay(session, buffer);
     if (response != relay_success)
     {
-        free_relay_session(session);
         return response;
     }
 
@@ -206,7 +174,6 @@ relay_code_t process_middle_relay_session(relay_session_t* session, msg_tor_buff
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, session->last_fd, &ev) == -1)
     {
         close(epoll_fd);
-        free_relay_session(session);
         return relay_error;
     }
 
@@ -215,11 +182,9 @@ relay_code_t process_middle_relay_session(relay_session_t* session, msg_tor_buff
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, session->next_fd, &ev) == -1)
     {
         close(epoll_fd);
-        free_relay_session(session);
         return relay_error;
     }
 
-    // Sample recv loop (recv from client then from internet in a loop)
     while (true)
     {
         int events_amount = epoll_wait(epoll_fd, &event, MAX_EVENTS, -1);
@@ -227,17 +192,16 @@ relay_code_t process_middle_relay_session(relay_session_t* session, msg_tor_buff
         if (events_amount == -1)
         {
             close(epoll_fd);
-            free_relay_session(session);
             return relay_error;
         }
 
-        if (handle_event(session, &event, &response) == false)
+        if (process_event(session, &event, &response) == false)
         {
-            close(epoll_fd);
             return response;
         }
     }
-
+    
     // Will never get to here
+    close(epoll_fd);
     return relay_success;
 }

@@ -40,8 +40,6 @@ int connect_server(const server_config_metadata_t* config)
         return sock_fd;
     }
 
-    printf("Failed to connect to port %s...\n", config->port);
-
     freeaddrinfo(res);
 
     return -1;

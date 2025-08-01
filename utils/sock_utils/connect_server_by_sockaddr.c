@@ -15,7 +15,6 @@ int connect_server_by_sockaddr(struct sockaddr_storage* addr, socklen_t addr_len
 
     if (connect(sock, (struct sockaddr*)addr, addr_len) == -1) 
     {
-        fprintf(stderr, "Failed to connect\n");
         close(sock);
         return -1;
     }

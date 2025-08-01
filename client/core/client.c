@@ -49,10 +49,17 @@ static void sockaddr_to_unix(struct sockaddr_storage* storage, socklen_t* storag
 
 client_code_t run_client()
 {
+    client_code_t response = client_success;
+
     init_encryption();
 
     circuit_relay_list_t relay_list;
-    gather_relay_map(&relay_list, client_vars.config->relays);
+    response = gather_relay_map(&relay_list, client_vars.config->relays);
+
+    if (response != client_success)
+    {
+        return response;
+    }
 
     struct sockaddr_storage storage;
     socklen_t length;
@@ -78,6 +85,8 @@ client_code_t run_client()
     client_code_t result = process_client_session(&session);
     if (result != client_success)
     {
+        free_session(&session);
+
         free_encryption();
 
         return client_error;

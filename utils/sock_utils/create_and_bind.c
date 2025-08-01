@@ -48,8 +48,6 @@ int create_and_bind(const server_config_metadata_t *config)
         return -1;
     }
 
-    printf("Listening on port %s...\n", config->port);
-
     freeaddrinfo(res);
     return sock_fd;
 }

@@ -495,6 +495,7 @@ client_code_t process_events(client_session_t* session, msg_tor_buffer_t* buffer
     {
         if (handle_event_chunk(session, epoll_fd, buffer, &response) == false)
         {
+            close(epoll_fd);
             socket_hashmap_free(session->hashmap);
             session->hashmap = NULL;
 
@@ -502,6 +503,7 @@ client_code_t process_events(client_session_t* session, msg_tor_buffer_t* buffer
         }
     }
 
+    close(epoll_fd);
     socket_hashmap_free(session->hashmap);
     session->hashmap = NULL;
     
