@@ -3,6 +3,7 @@
 
 #include "client.h"
 #include "client_config.h"
+#include "stream_hashmap.h"
 #include <encryptions/encryptions.h>
 
 typedef struct client_session {
@@ -15,6 +16,8 @@ typedef struct client_session {
     const circuit_relay_list_t* relays;
     uint8_t cur_relays; 
     const client_config_metadata_t* config;
+
+    stream_hashmap_t* hashmap;
 
 } client_session_t;
 

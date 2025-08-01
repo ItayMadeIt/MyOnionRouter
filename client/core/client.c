@@ -61,14 +61,17 @@ client_code_t run_client()
 
     // init session
     client_session_t session;
-    session.relays = &relay_list;
     init_session(&session, sock_fd, &relay_list);
+    session.relays = &relay_list;
 
     // tls handshake
     if (handle_tls_sender(session.sock_fd, &session.tls_key) == false)
     {
         session.sock_fd = -1;
         free_session(&session);
+
+        free_encryption();
+
         return client_tls_error;
     }
 
